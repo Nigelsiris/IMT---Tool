@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMT — Invoice Master Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; background: #f0f2f5; color: #1d2939; font-size: 13px; }
+
+    /* ===== LAYOUT ===== */
+    .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ===== SIDEBAR ===== */
+    #sidebar { width: 220px; background: #0f1f3d; color: #92a3be; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid #0a1628; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 18px 16px; border-bottom: 1px solid #1e3356; background: #0a172e; }
+    .sidebar-brand-icon { width: 34px; height: 34px; background: #0070c0; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+    .sidebar-brand-text { font-weight: 700; font-size: 15px; color: #e4eaf3; line-height: 1.2; }
+    .sidebar-brand-sub { font-size: 10px; color: #5a7a9e; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .sidebar-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #3a5a7e; padding: 14px 16px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; color: #7a97b8; border-left: 2px solid transparent; transition: all 0.15s; font-weight: 500; font-size: 13px; }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #c8d8ec; }
+    .nav-item.active { background: rgba(0,112,192,0.15); color: #70b8f8; border-left-color: #0070c0; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .sidebar-footer { padding: 12px 16px; border-top: 1px solid #1e3356; font-size: 11px; color: #3a5a7e; }
+    .sidebar-footer a { color: #3a7abf; text-decoration: none; font-weight: 500; }
+    .sidebar-footer a:hover { color: #70b8f8; }
+
+    /* ===== MAIN ===== */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ===== TOPBAR ===== */
+    #topbar { height: 52px; background: white; border-bottom: 1px solid #e4e7ec; display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; z-index: 10; }
+    .topbar-title { font-weight: 600; font-size: 15px; color: #1d2939; flex: 1; }
+    .topbar-badge { display: flex; align-items: center; gap: 6px; background: #f0f2f5; border: 1px solid #e4e7ec; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; color: #475467; }
+    .readiness-chip { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .readiness-chip.high { background: #ecfdf3; color: #027a48; border: 1px solid #a9efc5; }
+    .readiness-chip.mid  { background: #fffaeb; color: #b54708; border: 1px solid #fedf89; }
+    .readiness-chip.low  { background: #fff1f3; color: #c01048; border: 1px solid #fecdd6; }
+    .btn-icon { width: 30px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid #e4e7ec; cursor: pointer; color: #667085; font-size: 13px; transition: all 0.15s; }
+    .btn-icon:hover { background: #f9fafb; color: #0070c0; border-color: #0070c0; }
+
+    /* ===== VIEWS ===== */
+    .view { display: none; flex: 1; overflow-y: auto; }
+    .view.active { display: flex; flex-direction: column; }
+    .view-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+
+    /* ===== ALERTS ===== */
+    .alert-strip { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 4px; border-left: 3px solid; font-size: 12px; }
+    .alert-strip.critical { background: #fff1f3; border-color: #f04438; color: #912018; }
+    .alert-strip.warning  { background: #fffaeb; border-color: #f79009; color: #93370d; }
+    .alert-strip.info     { background: #eff8ff; border-color: #2e90fa; color: #175cd3; }
+    .alert-strip.success  { background: #ecfdf3; border-color: #12b76a; color: #027a48; }
+    .alert-strip strong { font-weight: 600; }
+
+    /* ===== KPI TILES ===== */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .kpi-tile { background: white; border: 1px solid #e4e7ec; padding: 16px; border-radius: 4px; overflow: hidden; }
+    .kpi-tile-label { font-size: 11px; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+    .kpi-tile-value { font-size: 28px; font-weight: 700; color: #1d2939; line-height: 1; }
+    .kpi-tile-sub { font-size: 11px; color: #98a2b3; margin-top: 4px; }
+    .kpi-tile-icon { float: right; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .kpi-icon-blue  { background: #eff8ff; color: #2e90fa; }
+    .kpi-icon-teal  { background: #f0fdf9; color: #0d9488; }
+    .kpi-icon-red   { background: #fff1f3; color: #f04438; }
+    .kpi-icon-amber { background: #fffaeb; color: #f79009; }
+
+    /* ===== SECTION CARDS ===== */
+    .section-card { background: white; border: 1px solid #e4e7ec; border-radius: 4px; }
+    .section-card-header { padding: 12px 16px; border-bottom: 1px solid #f2f4f7; display: flex; align-items: center; justify-content: space-between; }
+    .section-card-title { font-weight: 600; font-size: 13px; color: #1d2939; display: flex; align-items: center; gap: 7px; }
+    .section-card-title i { color: #667085; font-size: 12px; }
+    .section-card-body { padding: 14px 16px; }
+
+    /* ===== CARRIER GRID ===== */
+    .carrier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+    .carrier-card { border: 1px solid #e4e7ec; border-radius: 4px; padding: 12px; background: #fafafa; }
+    .carrier-card.active-carrier { background: #f8fbff; border-color: #b9d7f8; }
+    .carrier-name  { font-weight: 700; font-size: 15px; color: #1d2939; }
+    .carrier-class { font-size: 10px; color: #667085; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+    .carrier-pill  { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+    .pill-ok      { background: #ecfdf3; color: #027a48; }
+    .pill-warn    { background: #fff8e1; color: #8a5500; }
+    .pill-missing { background: #f9fafb; color: #98a2b3; border: 1px solid #e4e7ec; }
+    .carrier-links { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .carrier-link-btn { font-size: 10px; font-weight: 500; color: #0070c0; text-decoration: none; padding: 2px 6px; border-radius: 3px; border: 1px solid #bdd7f5; background: #eff8ff; display: inline-flex; align-items: center; gap: 3px; }
+    .carrier-link-btn:hover { background: #dbeafe; }
+
+    /* ===== READINESS ===== */
+    .readiness-detail-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    .readiness-detail-table td { padding: 5px 8px; border-bottom: 1px solid #f2f4f7; }
+    .readiness-detail-table tr:last-child td { border-bottom: none; }
+
+    /* ===== GRID HELPERS ===== */
+    .two-col   { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+
+    /* ===== BUTTONS ===== */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; justify-content: center; font-family: inherit; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary  { background: #0070c0; color: white; border-color: #0060a9; }
+    .btn-primary:hover:not(:disabled)  { background: #005da0; }
+    .btn-danger   { background: white; color: #c01048; border-color: #fecdd6; }
+    .btn-danger:hover:not(:disabled)   { background: #fff1f3; }
+    .btn-secondary { background: white; color: #344054; border-color: #d0d5dd; }
+    .btn-secondary:hover:not(:disabled) { background: #f9fafb; }
+    .btn-success  { background: #027a48; color: white; border-color: #027a48; }
+    .btn-success:hover:not(:disabled)  { background: #05603a; }
+    .btn-full { width: 100%; }
+    .btn-lg   { padding: 10px 20px; font-size: 14px; }
+
+    /* ===== UPLOAD / DROPZONE ===== */
+    #dropzone { border: 2px dashed #d0d5dd; border-radius: 4px; padding: 24px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; }
+    #dropzone:hover, #dropzone.dragover { border-color: #0070c0; background: #f0f7ff; }
+    #dropzone i { font-size: 30px; color: #0070c0; margin-bottom: 8px; display: block; }
+    .drop-title { font-weight: 600; font-size: 13px; color: #344054; }
+    .drop-sub   { font-size: 11px; color: #98a2b3; margin-top: 3px; }
+
+    /* ===== CONSOLE ===== */
+    .console-wrap { background: #0d1117; border-radius: 4px; border: 1px solid #30363d; display: flex; flex-direction: column; overflow: hidden; }
+    .console-header { background: #161b22; border-bottom: 1px solid #30363d; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+    .console-header-left { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; }
+    .console-dots { display: flex; gap: 4px; }
+    .console-dot  { width: 10px; height: 10px; border-radius: 50%; }
+    .console-body { flex: 1; overflow-y: auto; padding: 10px 14px; font-family: 'Fira Code', 'Courier New', monospace; font-size: 12px; line-height: 1.6; }
+    .console-body::-webkit-scrollbar { width: 5px; }
+    .console-body::-webkit-scrollbar-track { background: #0d1117; }
+    .console-body::-webkit-scrollbar-thumb { background: #30363d; }
+    .log-info    { color: #58a6ff; }
+    .log-success { color: #3fb950; }
+    .log-warning { color: #d29922; }
+    .log-error   { color: #f85149; }
+    .log-time    { color: #484f58; }
+
+    /* ===== BADGES ===== */
+    .badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 3px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .badge-success { background: #ecfdf3; color: #027a48; }
+    .badge-warning { background: #fffaeb; color: #b54708; }
+    .badge-danger  { background: #fff1f3; color: #c01048; }
+    .badge-neutral { background: #f2f4f7; color: #475467; }
+    .badge-info    { background: #eff8ff; color: #175cd3; }
+    .badge-dot::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: currentColor; margin-right: 2px; }
+
+    /* ===== CONFIG CARDS ===== */
+    .config-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .config-card { border: 1px solid #e4e7ec; border-radius: 4px; padding: 12px; background: white; }
+    .config-card-name  { font-weight: 600; font-size: 13px; color: #1d2939; margin-bottom: 3px; }
+    .config-card-desc  { font-size: 11px; color: #667085; margin-bottom: 8px; line-height: 1.4; }
+    .config-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+
+    /* ===== SHEET TABS ===== */
+    .sheet-tabs { display: flex; align-items: center; gap: 2px; padding: 8px 16px; background: #f9fafb; border-bottom: 1px solid #e4e7ec; flex-wrap: nowrap; overflow-x: auto; flex-shrink: 0; }
+    .sheet-tab { padding: 5px 12px; border-radius: 3px; cursor: pointer; font-size: 12px; font-weight: 500; color: #667085; border: 1px solid transparent; transition: all 0.15s; white-space: nowrap; }
+    .sheet-tab:hover  { color: #1d2939; background: #f0f2f5; }
+    .sheet-tab.active { color: #0070c0; background: #eff8ff; border-color: #bdd7f5; }
+
+    /* ===== IFRAME ===== */
+    #sheet-iframe-wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    #sheet-frame { flex: 1; width: 100%; border: 0; background: #f9fafb; }
+    #sheet-no-data { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #98a2b3; font-size: 13px; }
+
+    /* ===== DATA TABLE ===== */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .data-table th { background: #f9fafb; border-bottom: 2px solid #e4e7ec; padding: 8px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #475467; }
+    .data-table td { padding: 8px 12px; border-bottom: 1px solid #f2f4f7; color: #344054; vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f9fafb; }
+
+    /* ===== SVG GAUGE ===== */
+    .gauge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .gauge-val   { font-size: 30px; font-weight: 700; color: #1d2939; line-height: 1; }
+    .gauge-label { font-size: 11px; color: #667085; font-weight: 500; }
+
+    /* ===== SCROLLBARS ===== */
+    .view::-webkit-scrollbar { width: 6px; }
+    .view::-webkit-scrollbar-track { background: #f0f2f5; }
+    .view::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 3px; }
+
+    /* ===== PROGRESS ===== */
+    .progress-bar-wrap { height: 4px; background: #e4e7ec; border-radius: 2px; overflow: hidden; }
+    .progress-bar { height: 100%; background: #0070c0; border-radius: 2px; }
+    .progress-bar.animated { animation: progress-pulse 1.5s ease-in-out infinite; }
+    @keyframes progress-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    @keyframes fa-spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+    .fa-spin { animation: fa-spin 1s linear infinite; }
+
+    /* ===== MISC ===== */
+    a { text-decoration: none; }
+    select, input, button { font-family: inherit; }
+
+    /* ===== CONFIG EDITOR ===== */
+    .cfg-tab-bar { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 2px solid #e4e7ec; padding-bottom: 0; flex-wrap: wrap; }
+    .cfg-tab { padding: 7px 14px; font-size: 12px; font-weight: 500; color: #667085; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-family: inherit; }
+    .cfg-tab:hover { color: #344054; }
+    .cfg-tab.active { color: #0070c0; border-bottom-color: #0070c0; font-weight: 600; }
+    .cfg-panel { display: none; }
+    .cfg-panel.active { display: block; }
+    .cfg-edit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .cfg-edit-table th { background: #f9fafb; border-bottom: 2px solid #e4e7ec; padding: 7px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #475467; white-space: nowrap; }
+    .cfg-edit-table td { padding: 4px 5px; border-bottom: 1px solid #f2f4f7; vertical-align: middle; }
+    .cfg-edit-table tr:last-child td { border-bottom: none; }
+    .cfg-input { width: 100%; padding: 5px 8px; border: 1px solid #e4e7ec; border-radius: 3px; font-size: 12px; color: #1d2939; font-family: inherit; background: white; box-sizing: border-box; }
+    .cfg-input:focus { outline: none; border-color: #0070c0; box-shadow: 0 0 0 2px rgba(0,112,192,0.1); }
+    .cfg-input.mono { font-family: 'Courier New', monospace; font-size: 11px; }
+    .cfg-select { width: 100%; padding: 5px 8px; border: 1px solid #e4e7ec; border-radius: 3px; font-size: 12px; color: #1d2939; font-family: inherit; background: white; box-sizing: border-box; }
+    .cfg-textarea { width: 100%; padding: 6px 8px; border: 1px solid #e4e7ec; border-radius: 3px; font-size: 12px; color: #1d2939; font-family: inherit; resize: vertical; min-height: 70px; box-sizing: border-box; }
+    .cfg-textarea:focus, .cfg-select:focus { outline: none; border-color: #0070c0; box-shadow: 0 0 0 2px rgba(0,112,192,0.1); }
+    .cfg-del-btn { width: 24px; height: 24px; border-radius: 3px; border: 1px solid #fecdd6; background: white; color: #c01048; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+    .cfg-del-btn:hover { background: #fff1f3; }
+    .cfg-save-bar { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f2f4f7; flex-wrap: wrap; }
+    .cfg-status { font-size: 12px; font-weight: 500; }
+    .cfg-note { font-size: 11px; color: #667085; line-height: 1.5; margin-bottom: 12px; }
+    .cfg-note code { background: #f2f4f7; padding: 1px 4px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 10px; }
+    .quick-add-box { background: #f0f7ff; border: 1px solid #bdd7f5; border-radius: 4px; padding: 12px 14px; margin-bottom: 14px; }
+    .quick-add-box-title { font-size: 12px; font-weight: 600; color: #175cd3; margin-bottom: 8px; }
+    .quick-add-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: end; }
+    @media (max-width: 700px) { .quick-add-fields { grid-template-columns: 1fr; } }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      #sidebar { width: 52px; }
+      .sidebar-brand-text, .sidebar-brand-sub, .nav-item span, .sidebar-section-label, .sidebar-footer { display: none; }
+      .nav-item { padding: 10px; justify-content: center; }
+      .sidebar-brand { justify-content: center; padding: 14px 10px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+  <nav id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon"><i class="fa-solid fa-truck-fast"></i></div>
+      <div>
+        <div class="sidebar-brand-text">IMT</div>
+        <div class="sidebar-brand-sub">Control Tower</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label">Operations</div>
+      <div class="nav-item active" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></div>
+      <div class="nav-item" data-view="processing"><i class="fa-solid fa-bolt"></i><span>Processing</span></div>
+      <div class="nav-item" data-view="data"><i class="fa-solid fa-table-columns"></i><span>Data Viewer</span></div>
+      <div class="sidebar-section-label">Administration</div>
+      <div class="nav-item" data-view="config"><i class="fa-solid fa-sliders"></i><span>Configuration</span></div>
+    </div>
+    <div class="sidebar-footer">
+      <span>Lidl Logistics</span><br>
+      <a id="wb-link" href="#" target="_blank">Open Workbook &#x2197;</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+  <div id="main">
+
+    <!-- TOP BAR -->
+    <header id="topbar">
+      <div class="topbar-title" id="topbar-view-title">Dashboard</div>
+      <div id="topbar-readiness" class="readiness-chip mid" style="display:none"><i class="fa-solid fa-shield-check"></i><span>&#8212;%</span></div>
+      <button class="btn-icon" id="btn-refresh" title="Refresh dashboard"><i class="fa-solid fa-rotate-right" id="refresh-icon"></i></button>
+    </header>
+
+    <!-- ══════════════ VIEW: DASHBOARD ══════════════ -->
+    <section class="view active" id="view-dashboard">
+      <div class="view-body">
+
+        <!-- Alerts -->
+        <div id="alerts-container" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+        <!-- KPI Row -->
+        <div class="kpi-grid">
+          <div class="kpi-tile">
+            <div class="kpi-tile-icon kpi-icon-blue"><i class="fa-solid fa-file-invoice"></i></div>
+            <div class="kpi-tile-label">Master Rows</div>
+            <div class="kpi-tile-value" id="kpi-master">&#8212;</div>
+            <div class="kpi-tile-sub">Invoice lines extracted</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="kpi-tile-icon kpi-icon-teal"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+            <div class="kpi-tile-label">TMST Records</div>
+            <div class="kpi-tile-value" id="kpi-tmst">&#8212;</div>
+            <div class="kpi-tile-sub">Reconciliation rows</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="kpi-tile-icon kpi-icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="kpi-tile-label">Discrepancies</div>
+            <div class="kpi-tile-value" id="kpi-discrepancies">&#8212;</div>
+            <div class="kpi-tile-sub" id="kpi-disc-rate">Pending resolution</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="kpi-tile-icon kpi-icon-amber"><i class="fa-solid fa-dollar-sign"></i></div>
+            <div class="kpi-tile-label">Add&#39;l Costs</div>
+            <div class="kpi-tile-value" id="kpi-costs">&#8212;</div>
+            <div class="kpi-tile-sub">Non-base line items</div>
+          </div>
+        </div>
+
+        <!-- Carriers + Readiness -->
+        <div class="two-col">
+          <div class="section-card">
+            <div class="section-card-header">
+              <span class="section-card-title"><i class="fa-solid fa-route"></i> Carrier Lanes</span>
+              <span class="badge badge-neutral" id="carrier-count-badge">0 configured</span>
+            </div>
+            <div class="section-card-body">
+              <div class="carrier-grid" id="carrier-grid"><div style="color:#98a2b3;font-size:12px;padding:10px 0;">Loading&#8230;</div></div>
+            </div>
+          </div>
+          <div class="section-card" style="display:flex;flex-direction:column;">
+            <div class="section-card-header">
+              <span class="section-card-title"><i class="fa-solid fa-shield-halved"></i> System Readiness</span>
+            </div>
+            <div class="section-card-body" style="flex:1;display:flex;flex-direction:column;justify-content:space-between;">
+              <div class="gauge" style="margin-bottom:12px;">
+                <svg width="120" height="70" viewBox="0 0 120 70">
+                  <path d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="#e4e7ec" stroke-width="10" stroke-linecap="round"/>
+                  <path id="gauge-arc" d="M10,60 A50,50 0 0,1 110,60" fill="none" stroke="#0070c0" stroke-width="10" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"/>
+                </svg>
+                <div class="gauge-val" id="readiness-pct" style="margin-top:-26px;">&#8212;%</div>
+                <div class="gauge-label">Operational readiness</div>
+              </div>
+              <table class="readiness-detail-table">
+                <tr><td style="color:#667085">Config tabs</td><td style="text-align:right;font-weight:600;" id="rd-config">&#8212;</td></tr>
+                <tr><td style="color:#667085">Carriers configured</td><td style="text-align:right;font-weight:600;" id="rd-carriers">&#8212;</td></tr>
+                <tr><td style="color:#667085">Haulier links</td><td style="text-align:right;font-weight:600;" id="rd-haulier">&#8212;</td></tr>
+                <tr><td style="color:#667085">Discrepancy rate</td><td style="text-align:right;font-weight:600;" id="rd-disc-rate">&#8212;</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operations Sheets summary table -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-table"></i> Operations Sheets</span>
+            <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="switchView('data')">Open Data Viewer</button>
+          </div>
+          <div class="section-card-body" style="padding:0;">
+            <table class="data-table" id="ops-sheets-table">
+              <thead><tr><th>Sheet</th><th>Description</th><th>Rows</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody><tr><td colspan="5" style="color:#98a2b3;padding:14px 12px;font-size:12px;">Loading&#8230;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: PROCESSING ══════════════ -->
+    <section class="view" id="view-processing">
+      <div class="view-body">
+
+        <div class="two-col">
+
+          <!-- Upload -->
+          <div class="section-card">
+            <div class="section-card-header">
+              <span class="section-card-title"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Invoice to Drive</span>
+            </div>
+            <div class="section-card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;">Target Carrier Lane</label>
+                <select id="carrier-select" style="width:100%;padding:8px 10px;border:1px solid #d0d5dd;border-radius:4px;font-size:13px;color:#1d2939;background:white;outline:none;">
+                  <option value="" disabled selected>Loading carriers&#8230;</option>
+                </select>
+              </div>
+              <div id="dropzone">
+                <i class="fa-regular fa-file-excel"></i>
+                <div class="drop-title">Drop invoice here (.xlsx)</div>
+                <div class="drop-sub">or <strong style="color:#0070c0;cursor:pointer;" onclick="document.getElementById('file-input').click()">browse files</strong></div>
+                <input type="file" id="file-input" style="display:none" accept=".xlsx,.xls,.csv">
+              </div>
+              <div id="upload-status" style="display:none;font-size:12px;padding:8px 10px;border-radius:4px;border-left:3px solid #2e90fa;background:#eff8ff;color:#175cd3;"></div>
+            </div>
+          </div>
+
+          <!-- Engine Controls -->
+          <div class="section-card">
+            <div class="section-card-header">
+              <span class="section-card-title"><i class="fa-solid fa-microchip"></i> Engine Controls</span>
+            </div>
+            <div class="section-card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <p style="font-size:12px;color:#667085;line-height:1.6;">Invoke the full carrier processing pipeline across all configured root folders, or archive active data to reset for the next run cycle.</p>
+              <div id="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:8px 10px;">
+                <i class="fa-regular fa-clock" style="margin-right:5px;"></i><span id="engine-last-msg"></span>
+              </div>
+              <div class="progress-bar-wrap" id="engine-progress-wrap" style="display:none;">
+                <div class="progress-bar animated" style="width:100%"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:auto;">
+                <button id="btn-run" class="btn btn-primary btn-full btn-lg"><i class="fa-solid fa-play"></i> Process All Invoices</button>
+                <button id="btn-clear" class="btn btn-danger btn-full"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker</button>
+                <button id="btn-init" class="btn btn-success btn-full"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize / Repair Config</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- System Console -->
+        <div class="console-wrap" style="flex:1;min-height:280px;">
+          <div class="console-header">
+            <div class="console-header-left">
+              <div class="console-dots">
+                <div class="console-dot" style="background:#ff5f57;"></div>
+                <div class="console-dot" style="background:#ffbd2e;"></div>
+                <div class="console-dot" style="background:#28c840;"></div>
+              </div>
+              <span style="margin-left:6px;"><i class="fa-solid fa-terminal"></i> SYSTEM CONSOLE</span>
+            </div>
+            <button onclick="document.getElementById('console-body').innerHTML=''" style="background:none;border:none;color:#484f58;font-size:11px;cursor:pointer;font-family:inherit;"><i class="fa-solid fa-eraser"></i> CLEAR</button>
+          </div>
+          <div id="console-body" class="console-body"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: DATA VIEWER ══════════════ -->
+    <section class="view" id="view-data" style="flex-direction:column;overflow:hidden;">
+      <div class="sheet-tabs" id="sheet-tabs-bar">
+        <span style="font-size:11px;color:#98a2b3;padding:4px 6px;">Loading sheets&#8230;</span>
+      </div>
+      <div id="sheet-iframe-wrap">
+        <div id="sheet-no-data">
+          <i class="fa-solid fa-table-cells" style="font-size:32px;color:#d0d5dd;"></i>
+          <span>No sheets available. Initialize configuration first.</span>
+        </div>
+        <iframe id="sheet-frame" src="" style="display:none;flex:1;width:100%;border:0;min-height:0;"></iframe>
+        <div id="sheet-toolbar" style="display:none;background:#f9fafb;border-top:1px solid #e4e7ec;padding:6px 14px;align-items:center;justify-content:space-between;">
+          <span id="sheet-open-label" style="font-size:11px;color:#667085;">&#8212;</span>
+          <a id="sheet-open-link" href="#" target="_blank" class="btn btn-secondary" style="padding:4px 10px;font-size:11px;"><i class="fa-solid fa-external-link-alt"></i> Open in Sheets</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: CONFIGURATION ══════════════ -->
+    <section class="view" id="view-config">
+      <div class="view-body">
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Workbook Initialization</span>
+          </div>
+          <div class="section-card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#1d2939;margin-bottom:3px;">Initialize / Repair Configuration Tabs</div>
+              <div style="font-size:12px;color:#667085;">Creates all five configuration tabs (System Config, GL Config, RDC Aliases, Email Template, Header Config) if missing or incomplete.</div>
+            </div>
+            <button id="btn-init-config" class="btn btn-success" style="min-width:200px;"><i class="fa-solid fa-play"></i> Run Initialization</button>
+          </div>
+          <div id="init-status" style="display:none;margin:0 16px 14px;font-size:12px;padding:8px 10px;border-radius:4px;"></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header"><span class="section-card-title"><i class="fa-solid fa-database"></i> Operations Sheets</span></div>
+          <div class="section-card-body"><div class="config-card-grid" id="ops-config-cards"><div style="color:#98a2b3;font-size:12px;">Loading&#8230;</div></div></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header"><span class="section-card-title"><i class="fa-solid fa-gear"></i> Configuration Sheets</span></div>
+          <div class="section-card-body"><div class="config-card-grid" id="cfg-config-cards"><div style="color:#98a2b3;font-size:12px;">Loading&#8230;</div></div></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header"><span class="section-card-title"><i class="fa-solid fa-route"></i> Carrier Configuration Audit</span></div>
+          <div style="overflow-x:auto;">
+            <table class="data-table" id="carrier-audit-table">
+              <thead><tr><th>Carrier</th><th>Type</th><th>Root Folder</th><th>Haulier Sheet</th><th>Status</th></tr></thead>
+              <tbody><tr><td colspan="5" style="color:#98a2b3;padding:14px 12px;font-size:12px;">Loading&#8230;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ══════════════ LIVE CONFIGURATION EDITOR ══════════════ -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-pencil"></i> Live Configuration Editor</span>
+            <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" id="btn-load-cfg">
+              <i class="fa-solid fa-rotate-right"></i> Load Config
+            </button>
+          </div>
+          <div class="section-card-body" id="cfg-editor-body">
+            <div style="color:#98a2b3;font-size:12px;text-align:center;padding:20px 0;">
+              <i class="fa-solid fa-sliders" style="font-size:24px;display:block;margin-bottom:8px;"></i>
+              Click <strong>Load Config</strong> to edit configuration settings directly from this panel.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- #main -->
+</div><!-- .app-shell -->
+
+<script>
+// ── STATE ───────────────────────────────────────────────
+var _data = null;
+var _activeView = 'dashboard';
+
+// ── VIEW ROUTER ──────────────────────────────────────────
+var viewTitles = { dashboard: 'Dashboard', processing: 'Processing', data: 'Data Viewer', config: 'Configuration' };
+
+function switchView(id) {
+  if (_activeView === id) return;
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  var v = document.getElementById('view-' + id);
+  if (v) v.classList.add('active');
+  var n = document.querySelector('[data-view="' + id + '"]');
+  if (n) n.classList.add('active');
+  document.getElementById('topbar-view-title').textContent = viewTitles[id] || id;
+  _activeView = id;
+}
+
+document.querySelectorAll('.nav-item[data-view]').forEach(function(el) {
+  el.addEventListener('click', function() { switchView(el.dataset.view); });
+});
+
+// ── LOGGING ────────────────────────────────────────────
+function logMsg(msg, type) {
+  type = type || 'info';
+  var el = document.getElementById('console-body');
+  var div = document.createElement('div');
+  var t = new Date().toTimeString().slice(0, 8);
+  var cls = { info: 'log-info', success: 'log-success', warning: 'log-warning', error: 'log-error' }[type] || 'log-info';
+  div.innerHTML = '<span class="log-time">[' + t + ']</span> <span class="' + cls + '">' + esc(msg) + '</span>';
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── INIT / DATA LOAD ───────────────────────────────────────
+function init() {
+  setRefreshing(true);
+  logMsg('Syncing with workbook...', 'info');
+  google.script.run
+    .withSuccessHandler(function(d) { _data = d; renderAll(d); setRefreshing(false); })
+    .withFailureHandler(function(e) { logMsg('Sync failed: ' + e.message, 'error'); setRefreshing(false); })
+    .getDashboardData();
+}
+
+function setRefreshing(on) {
+  document.getElementById('refresh-icon').className = on
+    ? 'fa-solid fa-rotate-right fa-spin'
+    : 'fa-solid fa-rotate-right';
+}
+
+// ── RENDER ALL ──────────────────────────────────────────
+function renderAll(d) {
+  renderTopBar(d);
+  renderAlerts(d.alerts || []);
+  renderKPIs(d);
+  renderCarrierGrid(d.carriers || []);
+  renderReadiness(d.summary || {});
+  renderOpsSheetTable(d.operationsSheets || []);
+  renderConfigCards(d.operationsSheets || [], d.configSheets || []);
+  renderCarrierAuditTable(d.carriers || []);
+  renderSheetTabs(d.viewerSheets || []);
+  populateCarrierSelect(d.carriers || []);
+  seedConsole(d.consoleSeed || []);
+  if (d.workbook && d.workbook.openUrl) {
+    document.getElementById('wb-link').href = d.workbook.openUrl;
+    document.getElementById('wb-link').textContent = (d.workbook.name || 'Open Workbook') + ' \u2197';
+  }
+}
+
+function renderTopBar(d) {
+  var score = (d.summary || {}).readinessScore || 0;
+  var chip  = document.getElementById('topbar-readiness');
+  chip.style.display = 'flex';
+  chip.querySelector('span').textContent = score + '%';
+  chip.className = 'readiness-chip ' + (score >= 80 ? 'high' : score >= 50 ? 'mid' : 'low');
+}
+
+function renderAlerts(alerts) {
+  var c = document.getElementById('alerts-container');
+  c.innerHTML = '';
+  var icons = { critical: 'fa-circle-xmark', warning: 'fa-triangle-exclamation', info: 'fa-circle-info', success: 'fa-circle-check' };
+  alerts.forEach(function(a) {
+    var div = document.createElement('div');
+    div.className = 'alert-strip ' + a.severity;
+    div.innerHTML = '<i class="fa-solid ' + (icons[a.severity] || 'fa-info') + '"></i>'
+      + '<div><strong>' + esc(a.title) + '</strong>'
+      + (a.detail ? ' &mdash; ' + esc(a.detail) : '') + '</div>';
+    c.appendChild(div);
+  });
+}
+
+function renderKPIs(d) {
+  document.getElementById('kpi-master').textContent        = fmt(d.masterRows);
+  document.getElementById('kpi-tmst').textContent          = fmt(d.tmstRows);
+  document.getElementById('kpi-discrepancies').textContent = fmt(d.discrepancies);
+  document.getElementById('kpi-costs').textContent         = fmt(d.additionalCosts);
+  var rate = (d.summary || {}).discrepancyRate;
+  if (rate !== undefined) document.getElementById('kpi-disc-rate').textContent = rate + '% of master rows';
+}
+
+function fmt(n) { return (n === undefined || n === null) ? '0' : Number(n).toLocaleString(); }
+
+function renderCarrierGrid(carriers) {
+  var grid = document.getElementById('carrier-grid');
+  var configured = carriers.filter(function(c) { return c.rootFolderConfigured; }).length;
+  document.getElementById('carrier-count-badge').textContent = configured + ' / ' + carriers.length + ' configured';
+  if (!carriers.length) {
+    grid.innerHTML = '<div style="color:#98a2b3;font-size:12px;padding:10px 0;">No carriers in configuration.</div>';
+    return;
+  }
+  grid.innerHTML = carriers.map(function(c) {
+    var fp = c.rootFolderConfigured
+      ? '<span class="carrier-pill pill-ok"><i class="fa-solid fa-folder-open"></i> Folder</span>'
+      : '<span class="carrier-pill pill-missing">No Folder</span>';
+    var hp = c.haulierLinked
+      ? '<span class="carrier-pill pill-ok"><i class="fa-solid fa-link"></i> Haulier</span>'
+      : '<span class="carrier-pill pill-warn">No Haulier</span>';
+    var fl = c.driveUrl   ? '<a href="' + c.driveUrl   + '" target="_blank" class="carrier-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>'   : '';
+    var hl = c.haulierUrl ? '<a href="' + c.haulierUrl + '" target="_blank" class="carrier-link-btn"><i class="fa-solid fa-table"></i> Haulier</a>' : '';
+    return '<div class="carrier-card' + (c.rootFolderConfigured ? ' active-carrier' : '') + '">'
+      + '<div class="carrier-name">' + esc(c.name) + '</div>'
+      + '<div class="carrier-class">' + esc(c.classification || '') + '</div>'
+      + '<div style="display:flex;gap:4px;flex-wrap:wrap;">' + fp + hp + '</div>'
+      + '<div class="carrier-links">' + fl + hl + '</div></div>';
+  }).join('');
+}
+
+function renderReadiness(s) {
+  var score = s.readinessScore || 0;
+  document.getElementById('readiness-pct').textContent = score + '%';
+  var arc = document.getElementById('gauge-arc');
+  if (arc) {
+    arc.setAttribute('stroke-dashoffset', (157 - (score / 100) * 157).toFixed(1));
+    arc.setAttribute('stroke', score >= 80 ? '#12b76a' : score >= 50 ? '#f79009' : '#f04438');
+  }
+  document.getElementById('rd-config').textContent    = (s.configReadyCount || 0) + ' / 5';
+  document.getElementById('rd-carriers').textContent  = (s.configuredCarrierCount || 0) + ' / ' + (s.primaryCarrierCount || 3);
+  document.getElementById('rd-haulier').textContent   = (s.linkedHaulierCount || 0) + ' linked';
+  document.getElementById('rd-disc-rate').textContent = (s.discrepancyRate || 0) + '%';
+}
+
+function renderOpsSheetTable(sheets) {
+  var tbody = document.querySelector('#ops-sheets-table tbody');
+  if (!sheets.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No operations sheets found.</td></tr>'; return; }
+  tbody.innerHTML = sheets.map(function(s) {
+    var badge = s.exists ? '<span class="badge badge-success badge-dot">Active</span>' : '<span class="badge badge-neutral badge-dot">Missing</span>';
+    var link  = s.openUrl ? '<a href="' + s.openUrl + '" target="_blank" class="btn btn-secondary" style="padding:3px 8px;font-size:11px;"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' : '&mdash;';
+    return '<tr><td style="font-weight:600;">' + esc(s.label || s.name) + '</td>'
+      + '<td style="color:#667085;">' + esc(s.description || '') + '</td>'
+      + '<td style="font-weight:600;font-family:monospace;">' + fmt(s.rows) + '</td>'
+      + '<td>' + badge + '</td><td>' + link + '</td></tr>';
+  }).join('');
+}
+
+function renderConfigCards(opsSheets, cfgSheets) {
+  function card(s) {
+    var exists = s.exists;
+    var border  = exists ? '' : 'border-left:3px solid #f04438;';
+    var badge   = exists ? '<span class="badge badge-success badge-dot">Present</span>' : '<span class="badge badge-danger badge-dot">Missing</span>';
+    var link    = s.openUrl ? '<a href="' + s.openUrl + '" target="_blank" class="btn btn-secondary" style="padding:3px 8px;font-size:11px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>' : '';
+    return '<div class="config-card" style="' + border + '">'
+      + '<div class="config-card-name">' + esc(s.label || s.name) + '</div>'
+      + '<div class="config-card-desc">' + esc(s.description || '') + '</div>'
+      + '<div class="config-card-footer">'
+      + '<div>' + badge + (exists ? ' <span style="font-size:10px;color:#98a2b3;margin-left:5px;">' + fmt(s.rows) + ' rows</span>' : '') + '</div>'
+      + link + '</div></div>';
+  }
+  document.getElementById('ops-config-cards').innerHTML = opsSheets.map(card).join('');
+  document.getElementById('cfg-config-cards').innerHTML = cfgSheets.map(card).join('');
+}
+
+function renderCarrierAuditTable(carriers) {
+  var tbody = document.querySelector('#carrier-audit-table tbody');
+  if (!carriers.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No carrier configuration found.</td></tr>'; return; }
+  tbody.innerHTML = carriers.map(function(c) {
+    var fc = c.rootFolderConfigured
+      ? (c.driveUrl ? '<a href="' + c.driveUrl + '" target="_blank" class="carrier-link-btn"><i class="fa-brands fa-google-drive"></i> ' + esc(c.folderId.slice(0, 12)) + '&hellip;</a>' : '<span class="badge badge-success">Set</span>')
+      : '<span class="badge badge-danger">Not set</span>';
+    var hc = c.haulierLinked
+      ? (c.haulierUrl ? '<a href="' + c.haulierUrl + '" target="_blank" class="carrier-link-btn"><i class="fa-solid fa-table"></i> ' + esc(c.haulierId.slice(0, 12)) + '&hellip;</a>' : '<span class="badge badge-success">Set</span>')
+      : '<span class="badge badge-neutral">Not linked</span>';
+    var st = (c.rootFolderConfigured && c.haulierLinked) ? '<span class="badge badge-success badge-dot">Ready</span>'
+           : c.rootFolderConfigured ? '<span class="badge badge-warning badge-dot">Partial</span>'
+           : '<span class="badge badge-danger badge-dot">Unconfigured</span>';
+    return '<tr>'
+      + '<td style="font-weight:700;">' + esc(c.name) + '</td>'
+      + '<td>' + (c.primaryLane ? '<span class="badge badge-info">Primary</span>' : '<span class="badge badge-neutral">Dynamic</span>') + '</td>'
+      + '<td>' + fc + '</td><td>' + hc + '</td><td>' + st + '</td></tr>';
+  }).join('');
+}
+
+function renderSheetTabs(sheets) {
+  var bar = document.getElementById('sheet-tabs-bar');
+  if (!sheets.length) { bar.innerHTML = '<span style="font-size:11px;color:#98a2b3;padding:4px 6px;">No sheets available.</span>'; return; }
+  bar.innerHTML = sheets.map(function(s, i) {
+    return '<div class="sheet-tab' + (i === 0 ? ' active' : '') + '" data-embed="' + esc(s.embedUrl || '') + '" data-open="' + esc(s.openUrl || '') + '" data-name="' + esc(s.label || s.name) + '">'
+      + esc(s.label || s.name)
+      + (s.rows ? ' <span style="font-size:10px;color:#98a2b3;">(' + s.rows + ')</span>' : '')
+      + '</div>';
+  }).join('');
+  bar.querySelectorAll('.sheet-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      bar.querySelectorAll('.sheet-tab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      loadSheetEmbed(tab.dataset.embed, tab.dataset.open, tab.dataset.name);
+    });
+  });
+  var first = bar.querySelector('.sheet-tab');
+  if (first && first.dataset.embed) loadSheetEmbed(first.dataset.embed, first.dataset.open, first.dataset.name);
+}
+
+function loadSheetEmbed(embedUrl, openUrl, name) {
+  var noData  = document.getElementById('sheet-no-data');
+  var frame   = document.getElementById('sheet-frame');
+  var toolbar = document.getElementById('sheet-toolbar');
+  if (embedUrl) {
+    noData.style.display  = 'none';
+    frame.src             = embedUrl;
+    frame.style.display   = 'flex';
+    toolbar.style.display = 'flex';
+    document.getElementById('sheet-open-label').textContent = name || '';
+    var link = document.getElementById('sheet-open-link');
+    link.href         = openUrl || '#';
+    link.style.display = openUrl ? '' : 'none';
+  } else {
+    noData.style.display  = 'flex';
+    frame.style.display   = 'none';
+    toolbar.style.display = 'none';
+  }
+}
+
+function populateCarrierSelect(carriers) {
+  var sel = document.getElementById('carrier-select');
+  var configured = carriers.filter(function(c) { return c.rootFolderConfigured; });
+  sel.innerHTML = configured.length
+    ? '<option value="" disabled selected>Select carrier target&hellip;</option>'
+      + configured.map(function(c) {
+          return '<option value="' + esc(c.name) + '">' + esc(c.name) + (c.primaryLane ? ' (Primary)' : '') + '</option>';
+        }).join('')
+    : '<option value="" disabled selected>No carriers configured</option>';
+}
+
+function seedConsole(seed) {
+  (seed || []).forEach(function(e) { logMsg(e.message, e.type); });
+}
+
+// ── PROCESSING ENGINE ─────────────────────────────────────
+document.getElementById('btn-run').addEventListener('click', function() {
+  var btn = document.getElementById('btn-run');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing&hellip;';
+  document.getElementById('engine-progress-wrap').style.display = 'block';
+  logMsg('Dispatching invoice processing engine&hellip;', 'warning');
+  switchView('processing');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-play"></i> Process All Invoices';
+      document.getElementById('engine-progress-wrap').style.display = 'none';
+      var type = /^ERROR/i.test(res) ? 'error' : /^WARNING/i.test(res) ? 'warning' : 'success';
+      logMsg(res, type);
+      showEngineLastRun(res);
+      init();
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-play"></i> Process All Invoices';
+      document.getElementById('engine-progress-wrap').style.display = 'none';
+      logMsg('Engine failure: ' + e.message, 'error');
+    })
+    .runProcessorWeb();
+});
+
+document.getElementById('btn-clear').addEventListener('click', function() {
+  if (!confirm('Archive and clear all active tracking data (Master Input, TMST, Additional Costs, Discrepancy Tracker)?')) return;
+  var btn = document.getElementById('btn-clear');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Archiving&hellip;';
+  logMsg('Archiving and clearing tracker data&hellip;', 'warning');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker';
+      logMsg(res, 'success');
+      init();
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker';
+      logMsg('Clear failed: ' + e.message, 'error');
+    })
+    .clearTrackerWeb();
+});
+
+document.getElementById('btn-init').addEventListener('click', runInit);
+document.getElementById('btn-init-config').addEventListener('click', runInit);
+
+function runInit() {
+  var btns = [document.getElementById('btn-init'), document.getElementById('btn-init-config')];
+  btns.forEach(function(b) { if (b) { b.disabled = true; b.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Initializing&hellip;'; } });
+  logMsg('Running configuration initialization&hellip;', 'info');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btns.forEach(function(b) { if (b) b.disabled = false; });
+      if (document.getElementById('btn-init'))        document.getElementById('btn-init').innerHTML        = '<i class="fa-solid fa-wand-magic-sparkles"></i> Initialize / Repair Config';
+      if (document.getElementById('btn-init-config')) document.getElementById('btn-init-config').innerHTML = '<i class="fa-solid fa-play"></i> Run Initialization';
+      logMsg(res.message, res.success ? 'success' : 'warning');
+      showInitStatus(res.message, res.success ? 'success' : 'warning');
+      init();
+    })
+    .withFailureHandler(function(e) {
+      btns.forEach(function(b) { if (b) b.disabled = false; });
+      logMsg('Initialization failed: ' + e.message, 'error');
+    })
+    .setupConfigWeb();
+}
+
+function showEngineLastRun(msg) {
+  document.getElementById('engine-last-run').style.display = 'block';
+  document.getElementById('engine-last-msg').textContent = new Date().toLocaleTimeString() + ' &mdash; ' + msg.replace(/^(SUCCESS|WARNING|ERROR):\s*/i, '');
+}
+
+function showInitStatus(msg, type) {
+  var el = document.getElementById('init-status');
+  el.style.display = 'block';
+  el.textContent   = msg;
+  var map = { success: 'background:#ecfdf3;color:#027a48;border-left:3px solid #12b76a;', warning: 'background:#fffaeb;color:#93370d;border-left:3px solid #f79009;', error: 'background:#fff1f3;color:#912018;border-left:3px solid #f04438;' };
+  el.style.cssText = (map[type] || map.warning) + 'padding:8px 10px;border-radius:3px;font-size:12px;display:block;';
+}
+
+// ── UPLOAD ────────────────────────────────────────────
+function handleFile(file) {
+  var carrier = document.getElementById('carrier-select').value;
+  if (!carrier) { alert('Select a carrier lane first.'); return; }
+  showUploadStatus('<i class="fa-solid fa-circle-notch fa-spin"></i> Reading ' + esc(file.name) + '&hellip;', 'info');
+  logMsg('Reading file: ' + file.name, 'info');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    showUploadStatus('<i class="fa-solid fa-circle-notch fa-spin"></i> Uploading to ' + esc(carrier) + '&hellip;', 'info');
+    logMsg('Uploading ' + file.name + ' to ' + carrier, 'warning');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        showUploadStatus(res.success ? '<i class="fa-solid fa-circle-check"></i> ' + esc(res.message) : '<i class="fa-solid fa-circle-xmark"></i> ' + esc(res.message), res.success ? 'success' : 'error');
+        logMsg(res.success ? res.message : 'Upload failed: ' + res.message, res.success ? 'success' : 'error');
+        document.getElementById('file-input').value = '';
+      })
+      .withFailureHandler(function(e) {
+        showUploadStatus('<i class="fa-solid fa-circle-xmark"></i> ' + esc(e.message), 'error');
+        logMsg('Upload error: ' + e.message, 'error');
+      })
+      .uploadInvoiceWeb(ev.target.result, file.name, file.type, carrier);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showUploadStatus(html, type) {
+  var el = document.getElementById('upload-status');
+  el.style.display = 'block';
+  el.innerHTML = html;
+  var map = { info: ['#eff8ff','#175cd3','#2e90fa'], success: ['#ecfdf3','#027a48','#12b76a'], error: ['#fff1f3','#912018','#f04438'], warning: ['#fffaeb','#93370d','#f79009'] };
+  var parts = map[type] || map.info;
+  el.style.background = parts[0]; el.style.color = parts[1]; el.style.borderLeftColor = parts[2];
+}
+
+var dz = document.getElementById('dropzone');
+dz.addEventListener('dragover',  function(e) { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', function(e) { e.preventDefault(); dz.classList.remove('dragover'); });
+dz.addEventListener('drop', function(e) {
+  e.preventDefault(); dz.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+dz.addEventListener('click', function() { document.getElementById('file-input').click(); });
+document.getElementById('file-input').addEventListener('change', function(e) { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+// ── CONFIGURATION EDITOR ──────────────────────────────────
+document.getElementById('btn-load-cfg').addEventListener('click', loadConfigEditor);
+
+function loadConfigEditor() {
+  var btn = document.getElementById('btn-load-cfg');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;';
+  google.script.run
+    .withSuccessHandler(function(data) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Load Config';
+      renderConfigEditor(data);
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Load Config';
+      document.getElementById('cfg-editor-body').innerHTML =
+        '<div class="alert-strip critical" style="margin:0;"><i class="fa-solid fa-circle-xmark"></i>'
+        + '<div><strong>Failed to load configuration</strong> &mdash; ' + esc(e.message)
+        + '. Try running Initialization first.</div></div>';
+    })
+    .getConfigData();
+}
+
+function renderConfigEditor(data) {
+  var tabs = [
+    { id: 'system', label: 'System Config',  icon: 'fa-server'        },
+    { id: 'gl',     label: 'GL Config',      icon: 'fa-dollar-sign'   },
+    { id: 'rdc',    label: 'RDC Aliases',    icon: 'fa-location-dot'  },
+    { id: 'email',  label: 'Email Template', icon: 'fa-envelope'      },
+    { id: 'header', label: 'Header Config',  icon: 'fa-table-columns' }
+  ];
+
+  var tabBar = tabs.map(function(t, i) {
+    return '<button class="cfg-tab' + (i === 0 ? ' active' : '') + '" data-cfg-tab="' + t.id + '">'
+      + '<i class="fa-solid ' + t.icon + '" style="margin-right:5px;font-size:11px;"></i>' + t.label + '</button>';
+  }).join('');
+
+  var panels = '';
+  panels += '<div class="cfg-panel active" id="cfg-panel-system">' + buildSystemConfigPanel(data.systemConfig) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-gl">'            + buildGlConfigPanel(data.glConfig)         + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-rdc">'           + buildRdcAliasesPanel(data.rdcAliases)     + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-email">'         + buildEmailTemplatePanel(data.emailTemplate) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-header">'        + buildHeaderConfigPanel(data.headerConfig)  + '</div>';
+
+  document.getElementById('cfg-editor-body').innerHTML =
+    '<div class="cfg-tab-bar">' + tabBar + '</div>' + panels;
+
+  document.querySelectorAll('.cfg-tab[data-cfg-tab]').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.cfg-tab[data-cfg-tab]').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.cfg-panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      var panel = document.getElementById('cfg-panel-' + tab.dataset.cfgTab);
+      if (panel) panel.classList.add('active');
+    });
+  });
+}
+
+// ── SYSTEM CONFIG PANEL ───────────────────────────────────
+function buildSystemConfigPanel(rows) {
+  if (!rows) return missingTabAlert('System Config');
+  var html = '<div class="quick-add-box">'
+    + '<div class="quick-add-box-title"><i class="fa-solid fa-circle-plus"></i> Quick Add Carrier</div>'
+    + '<p class="cfg-note" style="margin-bottom:8px;">Add a new carrier lane to the system. The carrier name becomes the folder key prefix.</p>'
+    + '<div class="quick-add-fields">'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Carrier Name (e.g. WERNER)</label>'
+    + '<input class="cfg-input mono" id="qa-carrier-name" placeholder="CARRIERNAME" style="text-transform:uppercase;"></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Google Drive Root Folder ID</label>'
+    + '<input class="cfg-input mono" id="qa-folder-id" placeholder="1AbCdEfGhIj..."></div>'
+    + '<div><button class="btn btn-primary" style="width:100%;" onclick="quickAddCarrier()"><i class="fa-solid fa-plus"></i> Add Carrier Row</button></div>'
+    + '</div></div>';
+
+  html += '<p class="cfg-note">Edit carrier root folder IDs, haulier sheet IDs, and other system settings below. '
+    + 'To add a carrier: use key <code>CARRIERNAME_ROOT_FOLDER</code> with the Google Drive folder ID. '
+    + 'For primary RDC haulier links use <code>FRG_HAULIER_ID</code>, <code>GRM_HAULIER_ID</code>, <code>PYE_HAULIER_ID</code>.</p>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-system">'
+    + '<thead><tr><th>Setting Name / Key</th><th>Value / ID</th><th>Description</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row, i) {
+    html += cfgTableRow([
+      { val: row[0] || '', cls: 'mono' },
+      { val: row[1] || '', cls: 'mono' },
+      { val: row[2] || '' }
+    ]);
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('system', 'System Config', 3, '<button class="btn btn-secondary" onclick="addCfgRow(\'system\',3)"><i class="fa-solid fa-plus"></i> Add Row</button>');
+  return html;
+}
+
+function quickAddCarrier() {
+  var name   = (document.getElementById('qa-carrier-name').value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  var folder = (document.getElementById('qa-folder-id').value || '').trim();
+  if (!name)   { alert('Please enter a carrier name.'); return; }
+  if (!folder) { alert('Please enter a Google Drive folder ID.'); return; }
+  var tbody = document.querySelector('#tbl-system tbody');
+  var tr = document.createElement('tr');
+  tr.innerHTML = cfgRowHtml([
+    { val: name + '_ROOT_FOLDER', cls: 'mono' },
+    { val: folder, cls: 'mono' },
+    { val: name + ' Root Invoice Folder' }
+  ]);
+  tbody.appendChild(tr);
+  document.getElementById('qa-carrier-name').value = '';
+  document.getElementById('qa-folder-id').value = '';
+}
+
+// ── GL CONFIG PANEL ───────────────────────────────────────
+function buildGlConfigPanel(rows) {
+  if (!rows) return missingTabAlert('GL Config');
+  var typeOpts = ['Cost Center', 'Category Mapping', 'Default Category', 'Ignore Rule', 'Tolerance'];
+
+  var html = '<p class="cfg-note">Configure how invoice line items are coded to GL accounts. '
+    + '<strong>Category Mapping</strong> matches keywords in line-item descriptions and assigns a GL string. '
+    + '<strong>Ignore Rule</strong> skips any line item containing that word. '
+    + '<strong>Tolerance</strong> sets the minimum dollar amount for a line to be coded (key = <code>MIN_COST</code>).</p>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-gl">'
+    + '<thead><tr><th>Rule Type</th><th>Keyword / RDC</th><th>GL Account / Value</th><th>Description</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row) {
+    var selHtml = '<select class="cfg-select" data-col="0">';
+    typeOpts.forEach(function(opt) {
+      selHtml += '<option value="' + esc(opt) + '"' + (String(row[0] || '').trim() === opt ? ' selected' : '') + '>' + esc(opt) + '</option>';
+    });
+    selHtml += '</select>';
+    html += '<tr>'
+      + '<td>' + selHtml + '</td>'
+      + '<td><input class="cfg-input mono" data-col="1" value="' + esc(row[1] || '') + '"></td>'
+      + '<td><input class="cfg-input mono" data-col="2" value="' + esc(row[2] || '') + '"></td>'
+      + '<td><input class="cfg-input" data-col="3" value="' + esc(row[3] || '') + '"></td>'
+      + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('gl', 'GL Config', 4, '<button class="btn btn-secondary" onclick="addGlRow()"><i class="fa-solid fa-plus"></i> Add Rule</button>');
+  return html;
+}
+
+function addGlRow() {
+  var typeOpts = ['Cost Center', 'Category Mapping', 'Default Category', 'Ignore Rule', 'Tolerance'];
+  var tbody = document.querySelector('#tbl-gl tbody');
+  var tr = document.createElement('tr');
+  var selHtml = '<select class="cfg-select" data-col="0">';
+  typeOpts.forEach(function(opt) { selHtml += '<option value="' + esc(opt) + '">' + esc(opt) + '</option>'; });
+  selHtml += '</select>';
+  tr.innerHTML = '<td>' + selHtml + '</td>'
+    + '<td><input class="cfg-input mono" data-col="1" value=""></td>'
+    + '<td><input class="cfg-input mono" data-col="2" value=""></td>'
+    + '<td><input class="cfg-input" data-col="3" value=""></td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  tbody.appendChild(tr);
+}
+
+// ── RDC ALIASES PANEL ─────────────────────────────────────
+function buildRdcAliasesPanel(rows) {
+  if (!rows) return missingTabAlert('RDC Aliases');
+  var html = '<p class="cfg-note">Define which text patterns in invoice file names map to each RDC code. '
+    + 'Separate multiple aliases with commas. Matching is case-insensitive. '
+    + 'Example: <code>FRG</code> → <code>FREDERICKSBURG, FRG, VA, LIDL VA</code></p>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-rdc">'
+    + '<thead><tr><th>RDC Code</th><th>Aliases (comma-separated)</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row) {
+    html += cfgTableRow([
+      { val: row[0] || '', cls: 'mono' },
+      { val: row[1] || '' }
+    ]);
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('rdc', 'RDC Aliases', 2, '<button class="btn btn-secondary" onclick="addCfgRow(\'rdc\',2)"><i class="fa-solid fa-plus"></i> Add RDC</button>');
+  return html;
+}
+
+// ── EMAIL TEMPLATE PANEL ──────────────────────────────────
+function buildEmailTemplatePanel(allRows) {
+  if (!allRows || allRows.length < 2) return missingTabAlert('Email Template');
+  var dataRows = allRows.slice(1);
+  var html = '<p class="cfg-note">Customize the discrepancy notification emails sent to carriers. '
+    + 'Use <code>{CarrierName}</code> and <code>{FileName}</code> as placeholders in your text.</p>'
+    + '<div id="email-fields">';
+  dataRows.forEach(function(row, i) {
+    var isMultiline = String(row[0] || '').toLowerCase() === 'greeting' || String(row[0] || '').toLowerCase() === 'outro';
+    var vars = String(row[2] || '');
+    html += '<div style="margin-bottom:14px;" data-setting="' + esc(String(row[0] || '')) + '" data-vars="' + esc(vars) + '">'
+      + '<label style="font-size:11px;font-weight:600;color:#475467;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:3px;">'
+      + esc(String(row[0] || '')) + '</label>';
+    if (vars) html += '<div style="font-size:10px;color:#98a2b3;margin-bottom:4px;">Available variables: <code>' + esc(vars) + '</code></div>';
+    var safeVal = esc(String(row[1] || ''));
+    if (isMultiline) {
+      html += '<textarea class="cfg-textarea email-val" rows="4">' + safeVal + '</textarea>';
+    } else {
+      html += '<input class="cfg-input email-val" value="' + safeVal + '">';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div class="cfg-save-bar">'
+    + '<button class="btn btn-primary" onclick="saveEmailTemplate()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>'
+    + '<span class="cfg-status" id="cfg-status-email"></span></div>';
+  return html;
+}
+
+function saveEmailTemplate() {
+  var rows = [];
+  document.querySelectorAll('#email-fields > div[data-setting]').forEach(function(el) {
+    var setting = el.dataset.setting;
+    var vars    = el.dataset.vars;
+    var valEl   = el.querySelector('.email-val');
+    rows.push([setting, valEl ? valEl.value : '', vars]);
+  });
+  var statusEl = document.getElementById('cfg-status-email');
+  if (statusEl) { statusEl.textContent = 'Saving\u2026'; statusEl.style.color = '#475467'; }
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (statusEl) { statusEl.textContent = (res.success ? '\u2713 ' : '\u2717 ') + res.message; statusEl.style.color = res.success ? '#027a48' : '#c01048'; }
+    })
+    .withFailureHandler(function(e) {
+      if (statusEl) { statusEl.textContent = '\u2717 ' + e.message; statusEl.style.color = '#c01048'; }
+    })
+    .saveConfigData('Email Template', rows);
+}
+
+// ── HEADER CONFIG PANEL ───────────────────────────────────
+function buildHeaderConfigPanel(rows) {
+  if (!rows) return missingTabAlert('Header Config');
+  var html = '<p class="cfg-note">Map standard field names to the column header variants that appear in your carrier invoice files. '
+    + 'Separate multiple aliases with commas. Matching is case-insensitive. '
+    + 'Do not rename the Target Field column — those names are used internally by the processor.</p>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-header">'
+    + '<thead><tr><th>Target Field</th><th>Column Name Aliases (comma-separated)</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row) {
+    html += cfgTableRow([
+      { val: row[0] || '' },
+      { val: row[1] || '' }
+    ]);
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('header', 'Header Config', 2, '<button class="btn btn-secondary" onclick="addCfgRow(\'header\',2)"><i class="fa-solid fa-plus"></i> Add Field</button>');
+  return html;
+}
+
+// ── CONFIG EDITOR HELPERS ─────────────────────────────────
+function missingTabAlert(tabName) {
+  return '<div class="alert-strip warning" style="margin:0;">'
+    + '<i class="fa-solid fa-triangle-exclamation"></i>'
+    + '<div><strong>' + esc(tabName) + ' tab not found.</strong> Run Initialization from the card above first.</div></div>';
+}
+
+function cfgTableRow(cols) {
+  return '<tr>' + cfgRowHtml(cols) + '</tr>';
+}
+
+// Escape for HTML attribute values: use esc() for &, <, >
+// and additionally escape double and single quotes.
+function escAttr(str) {
+  var s = esc(str);
+  s = s.replace(/"/g, '&quot;');
+  s = s.replace(/'/g, '&#39;');
+  return s;
+}
+
+function cfgRowHtml(cols) {
+  var html = '';
+  cols.forEach(function(col, ci) {
+    html += '<td><input class="cfg-input' + (col.cls ? ' ' + col.cls : '') + '" data-col="' + ci + '" value="' + escAttr(col.val || '') + '"></td>';
+  });
+  html += '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  return html;
+}
+
+function cfgSaveBar(tableId, sheetName, numCols, addBtn) {
+  return '<div class="cfg-save-bar">'
+    + (addBtn || '')
+    + '<button class="btn btn-primary" onclick="saveCfgPanel(\'' + tableId + '\',\'' + sheetName + '\',' + numCols + ')">'
+    + '<i class="fa-solid fa-floppy-disk"></i> Save Changes</button>'
+    + '<span class="cfg-status" id="cfg-status-' + tableId + '"></span></div>';
+}
+
+function addCfgRow(tableId, numCols) {
+  var tbody = document.querySelector('#tbl-' + tableId + ' tbody');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  var html = '';
+  for (var c = 0; c < numCols; c++) {
+    html += '<td><input class="cfg-input' + (c === 0 ? ' mono' : '') + '" data-col="' + c + '" value=""></td>';
+  }
+  html += '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  tr.innerHTML = html;
+  tbody.appendChild(tr);
+}
+
+function delCfgRow(btn) {
+  var tr = btn.closest('tr');
+  if (tr) tr.remove();
+}
+
+function saveCfgPanel(tableId, sheetName, numCols) {
+  var tbody = document.querySelector('#tbl-' + tableId + ' tbody');
+  var statusEl = document.getElementById('cfg-status-' + tableId);
+  if (!tbody) return;
+
+  var rows = [];
+  Array.from(tbody.rows).forEach(function(tr) {
+    var row = [];
+    for (var c = 0; c < numCols; c++) {
+      var inp = tr.querySelector('[data-col="' + c + '"]');
+      row.push(inp ? inp.value : '');
+    }
+    if (row.some(function(v) { return String(v || '').trim(); })) rows.push(row); // skip fully blank rows
+  });
+
+  if (statusEl) { statusEl.textContent = 'Saving\u2026'; statusEl.style.color = '#475467'; }
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (statusEl) { statusEl.textContent = (res.success ? '\u2713 ' : '\u2717 ') + res.message; statusEl.style.color = res.success ? '#027a48' : '#c01048'; }
+      if (res.success) init();
+    })
+    .withFailureHandler(function(e) {
+      if (statusEl) { statusEl.textContent = '\u2717 ' + e.message; statusEl.style.color = '#c01048'; }
+    })
+    .saveConfigData(sheetName, rows);
+}
+
+// ── REFRESH ───────────────────────────────────────────
+document.getElementById('btn-refresh').addEventListener('click', init);
+
+// ── BOOT ───────────────────────────────────────────────
+window.onload = function() {
+  logMsg('IMT Control Tower initialized.', 'info');
+  init();
+};
+</script>
+</body>
+</html>
