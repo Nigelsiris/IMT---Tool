@@ -192,6 +192,44 @@
     a { text-decoration: none; }
     select, input, button { font-family: inherit; }
 
+    /* ===== INVOICE RESULT CARDS ===== */
+    .inv-result-card { background: white; border: 1px solid #e4e7ec; border-radius: 4px; overflow: hidden; }
+    .inv-result-header { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.15s; }
+    .inv-result-header:hover { background: #f9fafb; }
+    .inv-result-carrier { font-weight: 700; font-size: 16px; color: #1d2939; }
+    .inv-result-rdc { font-size: 11px; color: #667085; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .inv-result-stats { display: flex; gap: 12px; align-items: center; }
+    .inv-result-stat { text-align: center; }
+    .inv-result-stat-val { font-size: 18px; font-weight: 700; color: #1d2939; line-height: 1; }
+    .inv-result-stat-label { font-size: 10px; color: #98a2b3; font-weight: 500; text-transform: uppercase; }
+    .inv-result-body { display: none; border-top: 1px solid #f2f4f7; padding: 16px; }
+    .inv-result-body.open { display: block; }
+    .inv-result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .inv-mini-card { background: #f9fafb; border: 1px solid #f2f4f7; border-radius: 4px; padding: 10px 12px; }
+    .inv-mini-card-label { font-size: 10px; color: #667085; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 3px; }
+    .inv-mini-card-val { font-size: 20px; font-weight: 700; color: #1d2939; line-height: 1; }
+    .inv-mini-card-sub { font-size: 11px; color: #98a2b3; margin-top: 2px; }
+    .inv-match-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .inv-match-bar-label { font-size: 11px; font-weight: 600; color: #475467; width: 80px; }
+    .inv-match-bar-track { flex: 1; height: 8px; background: #e4e7ec; border-radius: 4px; overflow: hidden; }
+    .inv-match-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .inv-match-bar-pct { font-size: 11px; font-weight: 700; width: 36px; text-align: right; }
+    .inv-type-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .inv-type-chip { padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; background: #f2f4f7; color: #475467; border: 1px solid #e4e7ec; }
+    .inv-section-title { font-size: 12px; font-weight: 600; color: #1d2939; margin: 14px 0 8px; display: flex; align-items: center; gap: 6px; }
+    .inv-section-title i { color: #667085; font-size: 11px; }
+    .inv-chevron { transition: transform 0.2s; color: #98a2b3; font-size: 12px; }
+    .inv-chevron.open { transform: rotate(90deg); }
+    .inv-empty { text-align: center; padding: 40px 20px; color: #98a2b3; }
+    .inv-empty i { font-size: 36px; color: #d0d5dd; display: block; margin-bottom: 10px; }
+    .inv-filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .inv-filter-bar label { font-size: 11px; font-weight: 600; color: #475467; text-transform: uppercase; }
+    .inv-filter-bar select { padding: 5px 10px; border: 1px solid #d0d5dd; border-radius: 4px; font-size: 12px; background: white; color: #1d2939; }
+    .inv-summary-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .inv-summary-tile { background: white; border: 1px solid #e4e7ec; padding: 12px 16px; border-radius: 4px; flex: 1; min-width: 140px; }
+    .inv-summary-tile-label { font-size: 10px; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; }
+    .inv-summary-tile-val { font-size: 22px; font-weight: 700; color: #1d2939; line-height: 1.2; }
+
     /* ===== CONFIG EDITOR ===== */
     .cfg-tab-bar { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 2px solid #e4e7ec; padding-bottom: 0; flex-wrap: wrap; }
     .cfg-tab { padding: 7px 14px; font-size: 12px; font-weight: 500; color: #667085; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-family: inherit; }
@@ -220,6 +258,31 @@
     .quick-add-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: end; }
     @media (max-width: 700px) { .quick-add-fields { grid-template-columns: 1fr; } }
 
+    /* ===== GL CODE FINALIZATION ===== */
+    .gl-editor-section { background: white; border: 1px solid #e4e7ec; border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
+    .gl-editor-header { padding: 12px 16px; border-bottom: 1px solid #f2f4f7; background: #f9fafb; font-weight: 600; color: #1d2939; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .gl-editor-body { padding: 14px 16px; }
+    .gl-codes-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .gl-code-row { background: #f9fafb; border: 1px solid #f2f4f7; border-radius: 4px; padding: 10px 12px; display: grid; grid-template-columns: 2fr 1fr 24px; gap: 10px; align-items: center; }
+    .gl-code-row.total { background: #fff8e1; border-color: #fedf89; font-weight: 600; }
+    .gl-code-col-label { font-size: 11px; font-weight: 600; color: #667085; text-transform: uppercase; margin-bottom: 2px; }
+    .gl-code-col-value { font-size: 13px; color: #1d2939; font-family: 'Courier New', monospace; }
+    .gl-code-amount { font-size: 13px; color: #1d2939; font-weight: 600; }
+    .gl-code-amount input { width: 100%; padding: 5px 8px; border: 1px solid #e4e7ec; border-radius: 3px; font-size: 12px; font-family: inherit; box-sizing: border-box; }
+    .gl-code-amount input:focus { outline: none; border-color: #0070c0; box-shadow: 0 0 0 2px rgba(0,112,192,0.1); }
+    .gl-del-btn-small { width: 24px; height: 24px; border-radius: 3px; border: 1px solid #fecdd6; background: white; color: #c01048; font-size: 12px; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .gl-del-btn-small:hover { background: #fff1f3; }
+    .gl-add-section { background: #f0f7ff; border: 1px solid #bdd7f5; border-radius: 4px; padding: 12px; }
+    .gl-add-title { font-size: 12px; font-weight: 600; color: #175cd3; margin-bottom: 10px; }
+    .gl-add-inputs { display: grid; grid-template-columns: 2fr 1fr auto; gap: 8px; }
+    .gl-add-inputs input, .gl-add-inputs select { padding: 6px 8px; border: 1px solid #bdd7f5; border-radius: 3px; font-size: 12px; font-family: inherit; background: white; box-sizing: border-box; }
+    .gl-add-inputs input:focus, .gl-add-inputs select:focus { outline: none; border-color: #0070c0; box-shadow: 0 0 0 2px rgba(0,112,192,0.1); }
+    .gl-save-actions { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid #f2f4f7; flex-wrap: wrap; }
+    .inv-info-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .inv-info-tile { background: white; border: 1px solid #e4e7ec; border-radius: 4px; padding: 10px 12px; }
+    .inv-info-label { font-size: 10px; font-weight: 600; color: #667085; text-transform: uppercase; margin-bottom: 4px; }
+    .inv-info-value { font-size: 16px; font-weight: 600; color: #1d2939; }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 900px) {
       #sidebar { width: 52px; }
@@ -228,6 +291,8 @@
       .sidebar-brand { justify-content: center; padding: 14px 10px; }
       .kpi-grid { grid-template-columns: repeat(2, 1fr); }
       .two-col { grid-template-columns: 1fr; }
+      .inv-info-row { grid-template-columns: 1fr; }
+      .gl-add-inputs { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -246,7 +311,10 @@
     <div class="sidebar-nav">
       <div class="sidebar-section-label">Operations</div>
       <div class="nav-item active" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></div>
+      <div class="nav-item" data-view="operations"><i class="fa-solid fa-gears"></i><span>Operations</span></div>
       <div class="nav-item" data-view="processing"><i class="fa-solid fa-bolt"></i><span>Processing</span></div>
+      <div class="nav-item" data-view="finalization"><i class="fa-solid fa-check-double"></i><span>Invoice Finalization</span></div>
+      <div class="nav-item" data-view="results"><i class="fa-solid fa-receipt"></i><span>Invoice Results</span></div>
       <div class="nav-item" data-view="data"><i class="fa-solid fa-table-columns"></i><span>Data Viewer</span></div>
       <div class="sidebar-section-label">Administration</div>
       <div class="nav-item" data-view="config"><i class="fa-solid fa-sliders"></i><span>Configuration</span></div>
@@ -266,6 +334,24 @@
       <div id="topbar-readiness" class="readiness-chip mid" style="display:none"><i class="fa-solid fa-shield-check"></i><span>&#8212;%</span></div>
       <button class="btn-icon" id="btn-refresh" title="Refresh dashboard"><i class="fa-solid fa-rotate-right" id="refresh-icon"></i></button>
     </header>
+
+    <!-- ══════════════ PERSISTENT ENGINE CONTROLS ══════════════ -->
+    <div style="background:white;border-bottom:1px solid #e4e7ec;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px;">
+        <i class="fa-solid fa-microchip" style="color:#667085;"></i>
+        <span style="font-size:12px;font-weight:600;color:#1d2939;">Engine Controls</span>
+      </div>
+      <button id="btn-run" class="btn btn-primary" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-arrow-down-to-bracket"></i> Extract &amp; Load Invoices</button>
+      <button id="btn-clear" class="btn btn-danger" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear</button>
+      <button id="btn-init" class="btn btn-success" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize Config</button>
+      <div style="flex:1;"></div>
+      <div id="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:5px 8px;">
+        <i class="fa-regular fa-clock" style="margin-right:4px;"></i><span id="engine-last-msg"></span>
+      </div>
+      <div class="progress-bar-wrap" id="engine-progress-wrap" style="display:none;width:200px;margin-left:8px;">
+        <div class="progress-bar animated" style="width:100%"></div>
+      </div>
+    </div>
 
     <!-- ══════════════ VIEW: DASHBOARD ══════════════ -->
     <section class="view active" id="view-dashboard">
@@ -353,8 +439,8 @@
       </div>
     </section>
 
-    <!-- ══════════════ VIEW: PROCESSING ══════════════ -->
-    <section class="view" id="view-processing">
+    <!-- ══════════════ VIEW: OPERATIONS ══════════════ -->
+    <section class="view" id="view-operations">
       <div class="view-body">
 
         <div class="two-col">
@@ -387,7 +473,7 @@
               <span class="section-card-title"><i class="fa-solid fa-microchip"></i> Engine Controls</span>
             </div>
             <div class="section-card-body" style="display:flex;flex-direction:column;gap:12px;">
-              <p style="font-size:12px;color:#667085;line-height:1.6;">Invoke the full carrier processing pipeline across all configured root folders, or archive active data to reset for the next run cycle.</p>
+              <p style="font-size:12px;color:#667085;line-height:1.6;"><strong>Step 1 — Extract:</strong> Load invoice data from all configured root folders. Review and edit extracted invoices in the <em>Invoice Finalization</em> view, then return here to finalize and generate GL codes.</p>
               <div id="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:8px 10px;">
                 <i class="fa-regular fa-clock" style="margin-right:5px;"></i><span id="engine-last-msg"></span>
               </div>
@@ -395,7 +481,7 @@
                 <div class="progress-bar animated" style="width:100%"></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:8px;margin-top:auto;">
-                <button id="btn-run" class="btn btn-primary btn-full btn-lg"><i class="fa-solid fa-play"></i> Process All Invoices</button>
+                <button id="btn-run" class="btn btn-primary btn-full btn-lg"><i class="fa-solid fa-arrow-down-to-bracket"></i> Extract & Load Invoices</button>
                 <button id="btn-clear" class="btn btn-danger btn-full"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker</button>
                 <button id="btn-init" class="btn btn-success btn-full"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize / Repair Config</button>
               </div>
@@ -404,8 +490,15 @@
 
         </div>
 
-        <!-- System Console -->
-        <div class="console-wrap" style="flex:1;min-height:280px;">
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: PROCESSING ══════════════ -->
+    <section class="view" id="view-processing">
+      <div class="view-body" style="padding:0;gap:0;">
+
+        <!-- System Console Full Screen -->
+        <div class="console-wrap" style="flex:1;min-height:100%;border-radius:0;">
           <div class="console-header">
             <div class="console-header-left">
               <div class="console-dots">
@@ -413,11 +506,201 @@
                 <div class="console-dot" style="background:#ffbd2e;"></div>
                 <div class="console-dot" style="background:#28c840;"></div>
               </div>
-              <span style="margin-left:6px;"><i class="fa-solid fa-terminal"></i> SYSTEM CONSOLE</span>
+              <span style="margin-left:6px;"><i class="fa-solid fa-terminal"></i> PROCESSING CONSOLE</span>
             </div>
             <button onclick="document.getElementById('console-body').innerHTML=''" style="background:none;border:none;color:#484f58;font-size:11px;cursor:pointer;font-family:inherit;"><i class="fa-solid fa-eraser"></i> CLEAR</button>
           </div>
           <div id="console-body" class="console-body"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: INVOICE FINALIZATION ══════════════ -->
+    <section class="view" id="view-finalization">
+      <div class="view-body">
+
+        <!-- Invoice Info -->
+        <div class="gl-editor-section">
+          <div class="gl-editor-header">
+            <span><i class="fa-solid fa-receipt"></i> Invoice Information</span>
+          </div>
+          <div class="gl-editor-body">
+            <div class="inv-info-row">
+              <div class="inv-info-tile">
+                <div class="inv-info-label">Invoice File</div>
+                <div class="inv-info-value" id="fin-invoice-file">&#8212;</div>
+              </div>
+              <div class="inv-info-tile">
+                <div class="inv-info-label">RDC / Location</div>
+                <div class="inv-info-value" id="fin-invoice-rdc">&#8212;</div>
+              </div>
+              <div class="inv-info-tile">
+                <div class="inv-info-label">Invoice Number</div>
+                <div class="inv-info-value" id="fin-invoice-num">&#8212;</div>
+              </div>
+              <div class="inv-info-tile">
+                <div class="inv-info-label">Total Amount</div>
+                <div class="inv-info-value" id="fin-invoice-total">$&#8212;</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GL Codes Editor -->
+        <div class="gl-editor-section">
+          <div class="gl-editor-header">
+            <span><i class="fa-solid fa-code"></i> GL Code Allocation</span>
+            <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" id="btn-reload-finalization">
+              <i class="fa-solid fa-rotate-right"></i> Load Pending
+            </button>
+          </div>
+          <div class="gl-editor-body">
+            <div style="font-size:12px;color:#667085;margin-bottom:14px;">Edit GL codes below. The total must equal the invoice amount above.</div>
+            
+            <!-- GL Codes List -->
+            <div class="gl-codes-list" id="fin-gl-codes"></div>
+
+            <!-- Total Display -->
+            <div class="gl-codes-list">
+              <div class="gl-code-row total">
+                <div>
+                  <div class="gl-code-col-label">Total Stamped</div>
+                  <div class="gl-code-col-value">ALL GL CODES</div>
+                </div>
+                <div>
+                  <div class="gl-code-col-label">Amount</div>
+                  <div class="gl-code-amount" id="fin-gl-total" style="font-size:16px;">$0.00</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add New GL Code -->
+            <div class="gl-add-section">
+              <div class="gl-add-title"><i class="fa-solid fa-plus"></i> Add Additional GL Code</div>
+              <div class="gl-add-inputs">
+                <div>
+                  <label style="font-size:10px;font-weight:600;color:#475467;display:block;margin-bottom:4px;text-transform:uppercase;">Select Template or Enter Code</label>
+                  <select id="fin-gl-template" style="width:100%;">
+                    <option value="">-- Quick Select Template --</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size:10px;font-weight:600;color:#475467;display:block;margin-bottom:4px;text-transform:uppercase;">Amount</label>
+                  <input type="number" id="fin-gl-amount" placeholder="0.00" min="0" step="0.01" style="width:100%;">
+                </div>
+                <button class="btn btn-primary" style="padding:6px 12px;height:32px;margin-top:20px;" id="btn-add-gl-code"><i class="fa-solid fa-plus"></i> Add</button>
+              </div>
+            </div>
+
+            <!-- Save Actions -->
+            <div class="gl-save-actions">
+              <button class="btn btn-success" id="btn-save-gl-codes"><i class="fa-solid fa-check"></i> Save GL Code Changes</button>
+              <button class="btn btn-secondary" id="btn-cancel-finalization"><i class="fa-solid fa-times"></i> Cancel</button>
+              <div style="flex:1;"></div>
+              <div id="fin-status-msg" style="font-size:12px;color:#667085;display:flex;align-items:center;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finalization Actions -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-rocket"></i> Step 2 — Finalize & Generate PDFs</span>
+          </div>
+          <div class="section-card-body" style="display:flex;flex-direction:column;gap:12px;">
+            <p style="font-size:12px;color:#667085;line-height:1.6;">Once you've reviewed the extracted invoices, click below to apply GL codes and generate PDF exports for all pending invoices.</p>
+            <div id="fin-pending-summary" style="font-size:12px;padding:10px;background:#f9fafb;border:1px solid #e4e7ec;border-radius:4px;color:#667085;">Pending invoices are tracked in the current run.</div>
+            <button class="btn btn-success btn-lg" id="btn-finalize-invoices" style="width:100%;padding:12px;"><i class="fa-solid fa-rocket"></i> Finalize Pending Invoices</button>
+          </div>
+        </div>
+
+        <!-- Feature Info -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-circle-info"></i> About Invoice Finalization</span>
+          </div>
+          <div class="section-card-body">
+            <p style="font-size:12px;color:#667085;line-height:1.6;margin-bottom:10px;">
+              <strong>Invoice Finalization</strong> allows you to review and manually adjust GL code allocations after invoice extraction but before final PDF export and saving.
+            </p>
+            <ul style="font-size:12px;color:#667085;line-height:1.8;margin-left:16px;list-style:disc;">
+              <li>Load and review pending invoices in this view</li>
+              <li>Edit existing GL code amounts by clicking on the amount field</li>
+              <li>Add new GL codes from pre-configured templates or enter custom codes</li>
+              <li>Link GL codes to other cost centers (e.g., take from store deliveries)</li>
+              <li>The total of all GL codes must equal the invoice amount</li>
+              <li>Finalize to apply GL coding and generate PDFs</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: INVOICE RESULTS ══════════════ -->
+    <section class="view" id="view-results">
+      <div class="view-body">
+
+        <!-- Summary Tiles -->
+        <div class="inv-summary-row" id="inv-summary-tiles">
+          <div class="inv-summary-tile">
+            <div class="inv-summary-tile-label">Total Invoices</div>
+            <div class="inv-summary-tile-val" id="inv-total-count">&#8212;</div>
+          </div>
+          <div class="inv-summary-tile">
+            <div class="inv-summary-tile-label">Total TUs Processed</div>
+            <div class="inv-summary-tile-val" id="inv-total-tus">&#8212;</div>
+          </div>
+          <div class="inv-summary-tile">
+            <div class="inv-summary-tile-label">Overall Match Rate</div>
+            <div class="inv-summary-tile-val" id="inv-overall-match">&#8212;</div>
+          </div>
+          <div class="inv-summary-tile">
+            <div class="inv-summary-tile-label">Total Invoice Value</div>
+            <div class="inv-summary-tile-val" id="inv-total-value">&#8212;</div>
+          </div>
+          <div class="inv-summary-tile">
+            <div class="inv-summary-tile-label">Total Discrepancies</div>
+            <div class="inv-summary-tile-val" id="inv-total-disc">&#8212;</div>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="inv-filter-bar">
+          <label>Filter:</label>
+          <select id="inv-filter-carrier">
+            <option value="">All Carriers</option>
+          </select>
+          <select id="inv-filter-rdc">
+            <option value="">All RDCs</option>
+          </select>
+          <select id="inv-filter-status">
+            <option value="">All Statuses</option>
+            <option value="clean">Clean (0 discrepancies)</option>
+            <option value="issues">Has Issues</option>
+          </select>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:12px;" id="btn-load-results"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+
+        <div class="sheet-tabs" style="margin-bottom:10px;">
+          <button class="sheet-tab active" id="btn-inv-tab-summary"><i class="fa-solid fa-chart-column"></i> Summary</button>
+          <button class="sheet-tab" id="btn-inv-tab-view"><i class="fa-solid fa-file-lines"></i> View Invoice</button>
+        </div>
+
+        <!-- Results List -->
+        <div id="inv-results-list">
+          <div class="inv-empty">
+            <i class="fa-solid fa-receipt"></i>
+            <div>No invoice results yet. Run the processing engine first, then refresh.</div>
+          </div>
+        </div>
+
+        <div id="inv-view-list" style="display:none;">
+          <div class="inv-empty">
+            <i class="fa-solid fa-file-lines"></i>
+            <div>No invoice line items yet. Run the processing engine first, then refresh.</div>
+          </div>
         </div>
 
       </div>
@@ -452,7 +735,7 @@
           <div class="section-card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
               <div style="font-size:13px;font-weight:600;color:#1d2939;margin-bottom:3px;">Initialize / Repair Configuration Tabs</div>
-              <div style="font-size:12px;color:#667085;">Creates all five configuration tabs (System Config, GL Config, RDC Aliases, Email Template, Header Config) if missing or incomplete.</div>
+              <div style="font-size:12px;color:#667085;">Creates all eight configuration tabs (System Config, GL Config, RDC Aliases, Email Template, Header Config, Carrier Config, Output Routing, Rule Config) if missing or incomplete.</div>
             </div>
             <button id="btn-init-config" class="btn btn-success" style="min-width:200px;"><i class="fa-solid fa-play"></i> Run Initialization</button>
           </div>
@@ -473,9 +756,27 @@
           <div class="section-card-header"><span class="section-card-title"><i class="fa-solid fa-route"></i> Carrier Configuration Audit</span></div>
           <div style="overflow-x:auto;">
             <table class="data-table" id="carrier-audit-table">
-              <thead><tr><th>Carrier</th><th>Type</th><th>Root Folder</th><th>Haulier Sheet</th><th>Status</th></tr></thead>
-              <tbody><tr><td colspan="5" style="color:#98a2b3;padding:14px 12px;font-size:12px;">Loading&#8230;</td></tr></tbody>
+              <thead><tr><th>Carrier</th><th>Type</th><th>Enabled</th><th>Root Folder</th><th>Haulier Sheet</th><th>Status</th></tr></thead>
+              <tbody><tr><td colspan="6" style="color:#98a2b3;padding:14px 12px;font-size:12px;">Loading&#8230;</td></tr></tbody>
             </table>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-shield-check"></i> Configuration Validation</span>
+            <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" id="btn-validate-config">
+              <i class="fa-solid fa-vial-circle-check"></i> Validate Config
+            </button>
+          </div>
+          <div class="section-card-body">
+            <div id="validate-summary" style="font-size:12px;color:#667085;margin-bottom:10px;">Run validation to check config tabs, IDs, regex settings, and tolerance values.</div>
+            <div style="overflow-x:auto;">
+              <table class="data-table" id="validate-results-table">
+                <thead><tr><th>Status</th><th>Check</th><th>Detail</th></tr></thead>
+                <tbody><tr><td colspan="3" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No validation run yet.</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -505,9 +806,12 @@
 // ── STATE ───────────────────────────────────────────────
 var _data = null;
 var _activeView = 'dashboard';
+var _configData = null;
+var _currentFinalization = null;
+var _glCodeTemplates = [];
 
 // ── VIEW ROUTER ──────────────────────────────────────────
-var viewTitles = { dashboard: 'Dashboard', processing: 'Processing', data: 'Data Viewer', config: 'Configuration' };
+var viewTitles = { dashboard: 'Dashboard', operations: 'Operations', processing: 'Processing', finalization: 'Invoice Finalization', results: 'Invoice Results', data: 'Data Viewer', config: 'Configuration' };
 
 function switchView(id) {
   if (_activeView === id) return;
@@ -519,6 +823,7 @@ function switchView(id) {
   if (n) n.classList.add('active');
   document.getElementById('topbar-view-title').textContent = viewTitles[id] || id;
   _activeView = id;
+  if (id === 'results') loadInvoiceResults();
 }
 
 document.querySelectorAll('.nav-item[data-view]').forEach(function(el) {
@@ -611,25 +916,30 @@ function fmt(n) { return (n === undefined || n === null) ? '0' : Number(n).toLoc
 
 function renderCarrierGrid(carriers) {
   var grid = document.getElementById('carrier-grid');
-  var configured = carriers.filter(function(c) { return c.rootFolderConfigured; }).length;
-  document.getElementById('carrier-count-badge').textContent = configured + ' / ' + carriers.length + ' configured';
+  var enabled = carriers.filter(function(c) { return c.enabled !== false; });
+  var configured = enabled.filter(function(c) { return c.rootFolderConfigured; }).length;
+  document.getElementById('carrier-count-badge').textContent = configured + ' / ' + enabled.length + ' enabled';
   if (!carriers.length) {
     grid.innerHTML = '<div style="color:#98a2b3;font-size:12px;padding:10px 0;">No carriers in configuration.</div>';
     return;
   }
   grid.innerHTML = carriers.map(function(c) {
+    var isEnabled = c.enabled !== false;
     var fp = c.rootFolderConfigured
       ? '<span class="carrier-pill pill-ok"><i class="fa-solid fa-folder-open"></i> Folder</span>'
       : '<span class="carrier-pill pill-missing">No Folder</span>';
     var hp = c.haulierLinked
       ? '<span class="carrier-pill pill-ok"><i class="fa-solid fa-link"></i> Haulier</span>'
       : '<span class="carrier-pill pill-warn">No Haulier</span>';
+    var ep = isEnabled
+      ? '<span class="carrier-pill pill-ok"><i class="fa-solid fa-toggle-on"></i> Enabled</span>'
+      : '<span class="carrier-pill pill-missing"><i class="fa-solid fa-toggle-off"></i> Disabled</span>';
     var fl = c.driveUrl   ? '<a href="' + c.driveUrl   + '" target="_blank" class="carrier-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>'   : '';
     var hl = c.haulierUrl ? '<a href="' + c.haulierUrl + '" target="_blank" class="carrier-link-btn"><i class="fa-solid fa-table"></i> Haulier</a>' : '';
-    return '<div class="carrier-card' + (c.rootFolderConfigured ? ' active-carrier' : '') + '">'
+    return '<div class="carrier-card' + (c.rootFolderConfigured && isEnabled ? ' active-carrier' : '') + (!isEnabled ? '" style="opacity:0.72;"' : '"') + '>'
       + '<div class="carrier-name">' + esc(c.name) + '</div>'
       + '<div class="carrier-class">' + esc(c.classification || '') + '</div>'
-      + '<div style="display:flex;gap:4px;flex-wrap:wrap;">' + fp + hp + '</div>'
+      + '<div style="display:flex;gap:4px;flex-wrap:wrap;">' + ep + fp + hp + '</div>'
       + '<div class="carrier-links">' + fl + hl + '</div></div>';
   }).join('');
 }
@@ -642,8 +952,9 @@ function renderReadiness(s) {
     arc.setAttribute('stroke-dashoffset', (157 - (score / 100) * 157).toFixed(1));
     arc.setAttribute('stroke', score >= 80 ? '#12b76a' : score >= 50 ? '#f79009' : '#f04438');
   }
-  document.getElementById('rd-config').textContent    = (s.configReadyCount || 0) + ' / 5';
-  document.getElementById('rd-carriers').textContent  = (s.configuredCarrierCount || 0) + ' / ' + (s.primaryCarrierCount || 3);
+  document.getElementById('rd-config').textContent    = (s.configReadyCount || 0) + ' / 8';
+  var carrierDen = (s.enabledCarrierCount !== undefined) ? s.enabledCarrierCount : (s.primaryCarrierCount || 3);
+  document.getElementById('rd-carriers').textContent  = (s.configuredCarrierCount || 0) + ' / ' + carrierDen;
   document.getElementById('rd-haulier').textContent   = (s.linkedHaulierCount || 0) + ' linked';
   document.getElementById('rd-disc-rate').textContent = (s.discrepancyRate || 0) + '%';
 }
@@ -680,21 +991,26 @@ function renderConfigCards(opsSheets, cfgSheets) {
 
 function renderCarrierAuditTable(carriers) {
   var tbody = document.querySelector('#carrier-audit-table tbody');
-  if (!carriers.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No carrier configuration found.</td></tr>'; return; }
+  if (!carriers.length) { tbody.innerHTML = '<tr><td colspan="6" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No carrier configuration found.</td></tr>'; return; }
   tbody.innerHTML = carriers.map(function(c) {
+    var isEnabled = c.enabled !== false;
+    var en = isEnabled
+      ? '<span class="badge badge-success">YES</span>'
+      : '<span class="badge badge-neutral">NO</span>';
     var fc = c.rootFolderConfigured
       ? (c.driveUrl ? '<a href="' + c.driveUrl + '" target="_blank" class="carrier-link-btn"><i class="fa-brands fa-google-drive"></i> ' + esc(c.folderId.slice(0, 12)) + '&hellip;</a>' : '<span class="badge badge-success">Set</span>')
       : '<span class="badge badge-danger">Not set</span>';
     var hc = c.haulierLinked
       ? (c.haulierUrl ? '<a href="' + c.haulierUrl + '" target="_blank" class="carrier-link-btn"><i class="fa-solid fa-table"></i> ' + esc(c.haulierId.slice(0, 12)) + '&hellip;</a>' : '<span class="badge badge-success">Set</span>')
       : '<span class="badge badge-neutral">Not linked</span>';
-    var st = (c.rootFolderConfigured && c.haulierLinked) ? '<span class="badge badge-success badge-dot">Ready</span>'
+    var st = (!isEnabled) ? '<span class="badge badge-neutral badge-dot">Disabled</span>'
+           : (c.rootFolderConfigured && c.haulierLinked) ? '<span class="badge badge-success badge-dot">Ready</span>'
            : c.rootFolderConfigured ? '<span class="badge badge-warning badge-dot">Partial</span>'
            : '<span class="badge badge-danger badge-dot">Unconfigured</span>';
     return '<tr>'
       + '<td style="font-weight:700;">' + esc(c.name) + '</td>'
       + '<td>' + (c.primaryLane ? '<span class="badge badge-info">Primary</span>' : '<span class="badge badge-neutral">Dynamic</span>') + '</td>'
-      + '<td>' + fc + '</td><td>' + hc + '</td><td>' + st + '</td></tr>';
+      + '<td>' + en + '</td><td>' + fc + '</td><td>' + hc + '</td><td>' + st + '</td></tr>';
   }).join('');
 }
 
@@ -740,13 +1056,13 @@ function loadSheetEmbed(embedUrl, openUrl, name) {
 
 function populateCarrierSelect(carriers) {
   var sel = document.getElementById('carrier-select');
-  var configured = carriers.filter(function(c) { return c.rootFolderConfigured; });
+  var configured = carriers.filter(function(c) { return c.enabled !== false && c.rootFolderConfigured; });
   sel.innerHTML = configured.length
     ? '<option value="" disabled selected>Select carrier target&hellip;</option>'
       + configured.map(function(c) {
           return '<option value="' + esc(c.name) + '">' + esc(c.name) + (c.primaryLane ? ' (Primary)' : '') + '</option>';
         }).join('')
-    : '<option value="" disabled selected>No carriers configured</option>';
+    : '<option value="" disabled selected>No enabled carriers configured</option>';
 }
 
 function seedConsole(seed) {
@@ -757,27 +1073,28 @@ function seedConsole(seed) {
 document.getElementById('btn-run').addEventListener('click', function() {
   var btn = document.getElementById('btn-run');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing&hellip;';
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Extracting&hellip;';
   document.getElementById('engine-progress-wrap').style.display = 'block';
-  logMsg('Dispatching invoice processing engine&hellip;', 'warning');
+  logMsg('Dispatching invoice extraction engine&hellip;', 'warning');
   switchView('processing');
   google.script.run
     .withSuccessHandler(function(res) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-play"></i> Process All Invoices';
+      btn.innerHTML = '<i class="fa-solid fa-arrow-down-to-bracket"></i> Extract & Load Invoices';
       document.getElementById('engine-progress-wrap').style.display = 'none';
       var type = /^ERROR/i.test(res) ? 'error' : /^WARNING/i.test(res) ? 'warning' : 'success';
       logMsg(res, type);
       showEngineLastRun(res);
       init();
+      switchView('finalization');
     })
     .withFailureHandler(function(e) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-play"></i> Process All Invoices';
+      btn.innerHTML = '<i class="fa-solid fa-arrow-down-to-bracket"></i> Extract & Load Invoices';
       document.getElementById('engine-progress-wrap').style.display = 'none';
       logMsg('Engine failure: ' + e.message, 'error');
     })
-    .runProcessorWeb();
+    .runProcessorExtractOnlyWeb();
 });
 
 document.getElementById('btn-clear').addEventListener('click', function() {
@@ -792,6 +1109,7 @@ document.getElementById('btn-clear').addEventListener('click', function() {
       btn.innerHTML = '<i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker';
       logMsg(res, 'success');
       init();
+      loadInvoiceResults();
     })
     .withFailureHandler(function(e) {
       btn.disabled = false;
@@ -801,8 +1119,33 @@ document.getElementById('btn-clear').addEventListener('click', function() {
     .clearTrackerWeb();
 });
 
+if (document.getElementById('btn-finalize-invoices')) {
+  document.getElementById('btn-finalize-invoices').addEventListener('click', function() {
+    var btn = document.getElementById('btn-finalize-invoices');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Finalizing&hellip;';
+    logMsg('Finalizing pending invoices and generating PDFs&hellip;', 'warning');
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Finalize Pending Invoices';
+        var type = /^ERROR/i.test(res) ? 'error' : /^WARNING/i.test(res) ? 'warning' : 'success';
+        logMsg(res, type);
+        showEngineLastRun(res);
+        init();
+      })
+      .withFailureHandler(function(e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Finalize Pending Invoices';
+        logMsg('Finalization failure: ' + e.message, 'error');
+      })
+      .finalizePendingInvoicesWeb();
+  });
+}
+
 document.getElementById('btn-init').addEventListener('click', runInit);
 document.getElementById('btn-init-config').addEventListener('click', runInit);
+document.getElementById('btn-validate-config').addEventListener('click', runValidateConfig);
 
 function runInit() {
   var btns = [document.getElementById('btn-init'), document.getElementById('btn-init-config')];
@@ -822,6 +1165,59 @@ function runInit() {
       logMsg('Initialization failed: ' + e.message, 'error');
     })
     .setupConfigWeb();
+}
+
+function runValidateConfig() {
+  var btn = document.getElementById('btn-validate-config');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Validating&hellip;';
+  logMsg('Running configuration validation&hellip;', 'info');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-vial-circle-check"></i> Validate Config';
+      renderValidationResults(res || {});
+      logMsg((res && res.summary) ? res.summary : 'Validation completed.', (res && res.success) ? 'success' : 'warning');
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-vial-circle-check"></i> Validate Config';
+      var summary = document.getElementById('validate-summary');
+      summary.textContent = 'Validation failed: ' + e.message;
+      summary.style.color = '#c01048';
+      document.querySelector('#validate-results-table tbody').innerHTML =
+        '<tr><td colspan="3" style="color:#c01048;padding:14px 12px;font-size:12px;">' + esc(e.message) + '</td></tr>';
+      logMsg('Validation failed: ' + e.message, 'error');
+    })
+    .validateConfigWeb();
+}
+
+function renderValidationResults(res) {
+  var summaryEl = document.getElementById('validate-summary');
+  var tbody = document.querySelector('#validate-results-table tbody');
+  var checks = res.checks || [];
+
+  summaryEl.textContent = res.summary || 'Validation completed.';
+  summaryEl.style.color = res.success ? '#027a48' : '#b54708';
+
+  if (!checks.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No validation details returned.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = checks.map(function(c) {
+    var status = String(c.status || '').toLowerCase();
+    var badge = '<span class="badge badge-neutral">INFO</span>';
+    if (status === 'ok') badge = '<span class="badge badge-success">OK</span>';
+    if (status === 'warn') badge = '<span class="badge badge-warning">WARN</span>';
+    if (status === 'error') badge = '<span class="badge badge-danger">ERROR</span>';
+    return '<tr>'
+      + '<td>' + badge + '</td>'
+      + '<td style="font-weight:600;">' + esc(c.item || '') + '</td>'
+      + '<td>' + esc(c.detail || '') + '</td>'
+      + '</tr>';
+  }).join('');
 }
 
 function showEngineLastRun(msg) {
@@ -892,6 +1288,7 @@ function loadConfigEditor() {
     .withSuccessHandler(function(data) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Load Config';
+      _configData = data || null;
       renderConfigEditor(data);
     })
     .withFailureHandler(function(e) {
@@ -907,11 +1304,15 @@ function loadConfigEditor() {
 
 function renderConfigEditor(data) {
   var tabs = [
-    { id: 'system', label: 'System Config',  icon: 'fa-server'        },
-    { id: 'gl',     label: 'GL Config',      icon: 'fa-dollar-sign'   },
-    { id: 'rdc',    label: 'RDC Aliases',    icon: 'fa-location-dot'  },
-    { id: 'email',  label: 'Email Template', icon: 'fa-envelope'      },
-    { id: 'header', label: 'Header Config',  icon: 'fa-table-columns' }
+    { id: 'system',   label: 'System Config',    icon: 'fa-server'        },
+    { id: 'gl',       label: 'GL Config',         icon: 'fa-dollar-sign'   },
+    { id: 'rdc',      label: 'RDC Aliases',       icon: 'fa-location-dot'  },
+    { id: 'email',    label: 'Email Template',    icon: 'fa-envelope'      },
+    { id: 'header',   label: 'Header Config',     icon: 'fa-table-columns' },
+    { id: 'carrier',  label: 'Carrier Config',    icon: 'fa-route'         },
+    { id: 'routing',  label: 'Output Routing',    icon: 'fa-share-nodes'   },
+    { id: 'rules',    label: 'Rule Config',       icon: 'fa-list-check'    },
+    { id: 'addlcost', label: 'Addl Cost Config',  icon: 'fa-table-list'    }
   ];
 
   var tabBar = tabs.map(function(t, i) {
@@ -920,11 +1321,15 @@ function renderConfigEditor(data) {
   }).join('');
 
   var panels = '';
-  panels += '<div class="cfg-panel active" id="cfg-panel-system">' + buildSystemConfigPanel(data.systemConfig) + '</div>';
-  panels += '<div class="cfg-panel" id="cfg-panel-gl">'            + buildGlConfigPanel(data.glConfig)         + '</div>';
-  panels += '<div class="cfg-panel" id="cfg-panel-rdc">'           + buildRdcAliasesPanel(data.rdcAliases)     + '</div>';
-  panels += '<div class="cfg-panel" id="cfg-panel-email">'         + buildEmailTemplatePanel(data.emailTemplate) + '</div>';
-  panels += '<div class="cfg-panel" id="cfg-panel-header">'        + buildHeaderConfigPanel(data.headerConfig)  + '</div>';
+  panels += '<div class="cfg-panel active" id="cfg-panel-system">'   + buildSystemConfigPanel(data.systemConfig) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-gl">'              + buildGlConfigPanel(data.glConfig)         + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-rdc">'             + buildRdcAliasesPanel(data.rdcAliases)     + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-email">'           + buildEmailTemplatePanel(data.emailTemplate) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-header">'          + buildHeaderConfigPanel(data.headerConfig)  + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-carrier">'         + buildCarrierConfigPanel(data.carrierConfig) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-routing">'         + buildOutputRoutingPanel(data.outputRouting) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-rules">'           + buildRuleConfigPanel(data.ruleConfig, data.ruleCatalog || []) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-addlcost">'        + buildAddlCostConfigPanel(data.addlCostConfig) + '</div>';
 
   document.getElementById('cfg-editor-body').innerHTML =
     '<div class="cfg-tab-bar">' + tabBar + '</div>' + panels;
@@ -956,7 +1361,10 @@ function buildSystemConfigPanel(rows) {
 
   html += '<p class="cfg-note">Edit carrier root folder IDs, haulier sheet IDs, and other system settings below. '
     + 'To add a carrier: use key <code>CARRIERNAME_ROOT_FOLDER</code> with the Google Drive folder ID. '
-    + 'For primary RDC haulier links use <code>FRG_HAULIER_ID</code>, <code>GRM_HAULIER_ID</code>, <code>PYE_HAULIER_ID</code>.</p>';
+    + 'To enable/disable processing and uploads for a carrier: use <code>CARRIERNAME_ENABLED</code> with <code>YES</code> or <code>NO</code>. '
+    + 'For primary RDC haulier links use <code>FRG_HAULIER_ID</code>, <code>GRM_HAULIER_ID</code>, <code>PYE_HAULIER_ID</code>. '
+    + 'Invoice extraction keys: <code>INVOICE_NUMBER_REGEX</code>, <code>INVOICE_NUMBER_CELL</code>, <code>INVOICE_NUMBER_FALLBACK</code>. '
+    + 'Archive keys: <code>ARCHIVE_SHEET_PREFIX</code>, <code>ARCHIVE_DATE_FORMAT</code>, <code>ARCHIVE_RETENTION_DAYS</code>.</p>';
 
   html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-system">'
     + '<thead><tr><th>Setting Name / Key</th><th>Value / ID</th><th>Description</th><th style="width:28px;"></th></tr></thead>'
@@ -986,6 +1394,15 @@ function quickAddCarrier() {
     { val: name + ' Root Invoice Folder' }
   ]);
   tbody.appendChild(tr);
+
+  var trEnabled = document.createElement('tr');
+  trEnabled.innerHTML = cfgRowHtml([
+    { val: name + '_ENABLED', cls: 'mono' },
+    { val: 'YES', cls: 'mono' },
+    { val: 'Enable or disable ' + name + ' lane (YES/NO)' }
+  ]);
+  tbody.appendChild(trEnabled);
+
   document.getElementById('qa-carrier-name').value = '';
   document.getElementById('qa-folder-id').value = '';
 }
@@ -993,12 +1410,13 @@ function quickAddCarrier() {
 // ── GL CONFIG PANEL ───────────────────────────────────────
 function buildGlConfigPanel(rows) {
   if (!rows) return missingTabAlert('GL Config');
-  var typeOpts = ['Cost Center', 'Category Mapping', 'Default Category', 'Ignore Rule', 'Tolerance'];
+  var typeOpts = ['Cost Center', 'Category Mapping', 'Default Category', 'Ignore Rule', 'Tolerance', 'Backhaul Credit'];
 
   var html = '<p class="cfg-note">Configure how invoice line items are coded to GL accounts. '
     + '<strong>Category Mapping</strong> matches keywords in line-item descriptions and assigns a GL string. '
     + '<strong>Ignore Rule</strong> skips any line item containing that word. '
-    + '<strong>Tolerance</strong> sets the minimum dollar amount for a line to be coded (key = <code>MIN_COST</code>).</p>';
+    + '<strong>Tolerance</strong> supports <code>MIN_COST</code>, <code>AMOUNT_MATCH_PCT</code>, <code>AMOUNT_MATCH_HARD</code>, and <code>ESTIMATE_ALERT_HARD</code>. '
+    + '<strong>Backhaul Credit</strong> defines keywords that represent credit amounts to reduce the invoice total.</p>';
 
   html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-gl">'
     + '<thead><tr><th>Rule Type</th><th>Keyword / RDC</th><th>GL Account / Value</th><th>Description</th><th style="width:28px;"></th></tr></thead>'
@@ -1023,7 +1441,7 @@ function buildGlConfigPanel(rows) {
 }
 
 function addGlRow() {
-  var typeOpts = ['Cost Center', 'Category Mapping', 'Default Category', 'Ignore Rule', 'Tolerance'];
+  var typeOpts = ['Cost Center', 'Category Mapping', 'Default Category', 'Ignore Rule', 'Tolerance', 'Backhaul Credit'];
   var tbody = document.querySelector('#tbl-gl tbody');
   var tr = document.createElement('tr');
   var selHtml = '<select class="cfg-select" data-col="0">';
@@ -1112,20 +1530,415 @@ function buildHeaderConfigPanel(rows) {
   if (!rows) return missingTabAlert('Header Config');
   var html = '<p class="cfg-note">Map standard field names to the column header variants that appear in your carrier invoice files. '
     + 'Separate multiple aliases with commas. Matching is case-insensitive. '
-    + 'Do not rename the Target Field column — those names are used internally by the processor.</p>';
+    + 'Use the optional Carrier column for overrides (for example <code>HB</code>, <code>CRE</code>, <code>SCH</code>). '
+    + 'Leave Carrier blank for global defaults.</p>';
 
   html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-header">'
-    + '<thead><tr><th>Target Field</th><th>Column Name Aliases (comma-separated)</th><th style="width:28px;"></th></tr></thead>'
+    + '<thead><tr><th>Target Field</th><th>Column Name Aliases (comma-separated)</th><th>Carrier (blank = global)</th><th style="width:28px;"></th></tr></thead>'
     + '<tbody>';
   (rows || []).forEach(function(row) {
     html += cfgTableRow([
       { val: row[0] || '' },
-      { val: row[1] || '' }
+      { val: row[1] || '' },
+      { val: row[2] || '', cls: 'mono' }
     ]);
   });
   html += '</tbody></table></div>';
-  html += cfgSaveBar('header', 'Header Config', 2, '<button class="btn btn-secondary" onclick="addCfgRow(\'header\',2)"><i class="fa-solid fa-plus"></i> Add Field</button>');
+  html += cfgSaveBar('header', 'Header Config', 3, '<button class="btn btn-secondary" onclick="addCfgRow(\'header\',3)"><i class="fa-solid fa-plus"></i> Add Field</button>');
   return html;
+}
+
+// ── CARRIER CONFIG PANEL ──────────────────────────────────
+function buildCarrierConfigPanel(rows) {
+  if (!rows) return missingTabAlert('Carrier Config');
+  var html = '<p class="cfg-note">Map each carrier to a parser type. '
+    + 'Processor Type must be <code>HB</code>, <code>CRE</code>, or <code>SCH</code>. '
+    + 'Use Invoice # Pattern for future invoice-number extraction patterns if needed.</p>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-carrier">'
+    + '<thead><tr><th>Carrier Name</th><th>Processor Type</th><th>Invoice # Pattern (optional)</th><th>Notes</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row) {
+    var procVal = String(row[1] || 'HB').trim().toUpperCase();
+    var selHtml = '<select class="cfg-select" data-col="1">'
+      + '<option value="HB"' + (procVal === 'HB' ? ' selected' : '') + '>HB</option>'
+      + '<option value="CRE"' + (procVal === 'CRE' ? ' selected' : '') + '>CRE</option>'
+      + '<option value="SCH"' + (procVal === 'SCH' ? ' selected' : '') + '>SCH</option>'
+      + '</select>';
+    html += '<tr>'
+      + '<td><input class="cfg-input mono" data-col="0" value="' + escAttr(row[0] || '') + '"></td>'
+      + '<td>' + selHtml + '</td>'
+      + '<td><input class="cfg-input mono" data-col="2" value="' + escAttr(row[2] || '') + '"></td>'
+      + '<td><input class="cfg-input" data-col="3" value="' + escAttr(row[3] || '') + '"></td>'
+      + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('carrier', 'Carrier Config', 4,
+    '<button class="btn btn-secondary" onclick="addCarrierConfigRow()"><i class="fa-solid fa-plus"></i> Add Carrier</button>');
+  return html;
+}
+
+// ── RULE CONFIG PANEL ────────────────────────────────────
+function getRuleBuilderTokens() {
+  return [
+    'invoice.shift',
+    'invoice.store',
+    'invoice.tu',
+    'invoice.baseTu',
+    'invoice.totalCost',
+    'invoice.number',
+    'haulier.shift',
+    'haulier.store',
+    'haulier.tour',
+    'haulier.deliveryType',
+    'haulier.amount',
+    'calc.invoiceTour',
+    'calc.storeMatch',
+    'calc.shiftMatch',
+    'calc.tourMatch',
+    'calc.match',
+    'calc.type'
+  ];
+}
+
+function getRuleBuilderOperators() {
+  return ['EQUALS', 'NOT_EQUALS', 'CONTAINS', 'NOT_CONTAINS', 'STARTS_WITH', 'ENDS_WITH', 'BLANK', 'NOT_BLANK'];
+}
+
+function getRuleCatalogMap(catalog) {
+  var map = {};
+  (catalog || []).forEach(function(rule) {
+    if (rule && rule.key) map[String(rule.key).trim().toUpperCase()] = rule;
+  });
+  return map;
+}
+
+function buildRuleConfigPanel(rows, catalog) {
+  if (!rows) return missingTabAlert('Rule Config');
+
+  catalog = catalog || [];
+  var catalogMap = getRuleCatalogMap(catalog);
+  var systemCount = 0;
+  var customCount = 0;
+  var enabledCount = 0;
+  var scopedCount = 0;
+  (rows || []).forEach(function(row) {
+    var ruleType = String(row[1] || 'SYSTEM').trim().toUpperCase();
+    var enabledVal = String(row[2] || 'YES').trim().toUpperCase();
+    if (ruleType === 'CUSTOM') customCount++; else systemCount++;
+    if (enabledVal !== 'NO' && enabledVal !== 'FALSE') enabledCount++;
+    if (String(row[3] || '').trim()) scopedCount++;
+  });
+
+  var systemOptions = (catalog || []).map(function(rule) {
+    return '<option value="' + esc(rule.key) + '">' + esc(rule.key) + '</option>';
+  }).join('');
+
+  var tokenOptions = getRuleBuilderTokens().map(function(token) {
+    return '<option value="' + esc(token) + '">' + esc(token) + '</option>';
+  }).join('');
+
+  var operatorOptions = getRuleBuilderOperators().map(function(op) {
+    return '<option value="' + esc(op) + '">' + esc(op) + '</option>';
+  }).join('');
+
+  var html = '<p class="cfg-note">Manage built-in discrepancy rules and create lighter custom checks without editing Apps Script. '
+    + 'Use built-in rules for the complex workflow checks already supported by the engine, and use custom rules for quick field-based validations driven by one or two conditions.</p>';
+
+  html += '<div class="config-card-grid" style="margin-bottom:14px;">'
+    + '<div class="config-card"><div class="config-card-name">Configured Rules</div><div class="config-card-desc">Total rows currently saved in Rule Config.</div><div class="config-card-footer"><strong>' + rows.length + '</strong><span class="badge badge-neutral">rows</span></div></div>'
+    + '<div class="config-card"><div class="config-card-name">Built-in Rules</div><div class="config-card-desc">System-backed rules that map directly to scripted logic.</div><div class="config-card-footer"><strong>' + systemCount + '</strong><span class="badge badge-info">system</span></div></div>'
+    + '<div class="config-card"><div class="config-card-name">Custom Rules</div><div class="config-card-desc">Field-based checks authored from the UI.</div><div class="config-card-footer"><strong>' + customCount + '</strong><span class="badge badge-warning">custom</span></div></div>'
+    + '<div class="config-card"><div class="config-card-name">Scoped Rules</div><div class="config-card-desc">Rules limited to specific carriers.</div><div class="config-card-footer"><strong>' + scopedCount + '</strong><span class="badge badge-success">scoped</span></div></div>'
+    + '</div>';
+
+  html += '<div class="quick-add-box">'
+    + '<div class="quick-add-box-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Add Built-in Rule</div>'
+    + '<div class="quick-add-fields" style="grid-template-columns:1.2fr 0.8fr 1fr 1.4fr;">'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Rule Template</label><select class="cfg-select" id="rule-template-select">' + systemOptions + '</select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Enabled</label><select class="cfg-select" id="rule-template-enabled"><option value="YES" selected>YES</option><option value="NO">NO</option></select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Carrier Scope</label><input class="cfg-input mono" id="rule-template-scope" placeholder="Blank = default"></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Description Override</label><input class="cfg-input" id="rule-template-desc" placeholder="Optional"></div>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:flex-end;margin-top:10px;"><button class="btn btn-primary" onclick="addRulePresetRow()"><i class="fa-solid fa-plus"></i> Add Built-in Rule</button></div>'
+    + '</div>';
+
+  html += '<div class="quick-add-box">'
+    + '<div class="quick-add-box-title"><i class="fa-solid fa-sliders"></i> Create Custom Rule</div>'
+    + '<div style="font-size:11px;color:#667085;line-height:1.6;margin-bottom:10px;">Supported tokens: <code>' + esc(getRuleBuilderTokens().join(', ')) + '</code><br>Supported operators: <code>' + esc(getRuleBuilderOperators().join(', ')) + '</code></div>'
+    + '<div class="quick-add-fields" style="grid-template-columns:1fr 1fr 1fr 1fr;">'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Rule Key</label><input class="cfg-input mono" id="custom-rule-key" placeholder="CUSTOM_RULE_KEY"></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Enabled</label><select class="cfg-select" id="custom-rule-enabled"><option value="YES" selected>YES</option><option value="NO">NO</option></select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Carrier Scope</label><input class="cfg-input mono" id="custom-rule-scope" placeholder="HB, WERNER"></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Issue Label</label><input class="cfg-input" id="custom-rule-issue" placeholder="Rule triggered"></div>'
+    + '</div>'
+    + '<div class="quick-add-fields" style="grid-template-columns:1fr 0.8fr 1fr 1fr; margin-top:8px;">'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Condition 1 Left</label><select class="cfg-select" id="custom-rule-left1"><option value=""></option>' + tokenOptions + '</select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Condition 1 Operator</label><select class="cfg-select" id="custom-rule-op1">' + operatorOptions + '</select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Condition 1 Right</label><input class="cfg-input mono" id="custom-rule-right1" placeholder="Literal or token"></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Expected / Guidance</label><input class="cfg-input" id="custom-rule-expected" placeholder="What should be true?"></div>'
+    + '</div>'
+    + '<div class="quick-add-fields" style="grid-template-columns:1fr 0.8fr 1fr 1fr; margin-top:8px;">'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Condition 2 Left</label><select class="cfg-select" id="custom-rule-left2"><option value=""></option>' + tokenOptions + '</select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Condition 2 Operator</label><select class="cfg-select" id="custom-rule-op2"><option value=""></option>' + operatorOptions + '</select></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Condition 2 Right</label><input class="cfg-input mono" id="custom-rule-right2" placeholder="Optional"></div>'
+    + '<div><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Actual Source</label><input class="cfg-input mono" id="custom-rule-actual" placeholder="invoice.shift or haulier.shift|haulier.tour"></div>'
+    + '</div>'
+    + '<div style="margin-top:8px;"><label style="font-size:11px;font-weight:600;color:#475467;display:block;margin-bottom:3px;">Description</label><input class="cfg-input" id="custom-rule-desc" placeholder="Why this rule exists"></div>'
+    + '<div style="display:flex;justify-content:flex-end;margin-top:10px;"><button class="btn btn-primary" onclick="addCustomRuleRow()"><i class="fa-solid fa-plus"></i> Add Custom Rule</button></div>'
+    + '</div>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-rules">'
+    + '<thead><tr><th>Rule Key</th><th>Rule Type</th><th>Enabled</th><th>Carrier Scope</th><th>Condition 1</th><th>Condition 2</th><th>Issue Label</th><th>Expected</th><th>Actual Source</th><th>Description</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row) {
+    html += ruleConfigRowHtml(row, catalogMap);
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('rules', 'Rule Config', 10,
+    '<button class="btn btn-secondary" onclick="addRuleConfigRow()"><i class="fa-solid fa-plus"></i> Add Blank Rule</button>');
+  return html;
+}
+
+function ruleConfigRowHtml(row, catalogMap) {
+  row = row || [];
+  var ruleKey = String(row[0] || '').trim();
+  var ruleType = String(row[1] || 'SYSTEM').trim().toUpperCase() || 'SYSTEM';
+  var enabledVal = String(row[2] || 'YES').trim().toUpperCase();
+  var catalogItem = (catalogMap || {})[ruleKey.toUpperCase()] || null;
+  var descPlaceholder = catalogItem ? String(catalogItem.description || '') : '';
+
+  var ruleTypeSel = '<select class="cfg-select" data-col="1">'
+    + '<option value="SYSTEM"' + (ruleType === 'SYSTEM' ? ' selected' : '') + '>SYSTEM</option>'
+    + '<option value="CUSTOM"' + (ruleType === 'CUSTOM' ? ' selected' : '') + '>CUSTOM</option>'
+    + '</select>';
+  var enabledSel = '<select class="cfg-select" data-col="2">'
+    + '<option value="YES"' + (enabledVal !== 'NO' && enabledVal !== 'FALSE' ? ' selected' : '') + '>YES</option>'
+    + '<option value="NO"' + (enabledVal === 'NO' || enabledVal === 'FALSE' ? ' selected' : '') + '>NO</option>'
+    + '</select>';
+
+  return '<tr>'
+    + '<td><input class="cfg-input mono" data-col="0" value="' + escAttr(ruleKey) + '"></td>'
+    + '<td>' + ruleTypeSel + '</td>'
+    + '<td>' + enabledSel + '</td>'
+    + '<td><input class="cfg-input mono" data-col="3" value="' + escAttr(row[3] || '') + '" placeholder="Blank = all carriers"></td>'
+    + '<td><input class="cfg-input mono" data-col="4" value="' + escAttr(row[4] || '') + '" placeholder="invoice.shift NOT_BLANK"></td>'
+    + '<td><input class="cfg-input mono" data-col="5" value="' + escAttr(row[5] || '') + '" placeholder="Optional second condition"></td>'
+    + '<td><input class="cfg-input" data-col="6" value="' + escAttr(row[6] || '') + '"></td>'
+    + '<td><input class="cfg-input" data-col="7" value="' + escAttr(row[7] || '') + '"></td>'
+    + '<td><input class="cfg-input mono" data-col="8" value="' + escAttr(row[8] || '') + '" placeholder="invoice.shift"></td>'
+    + '<td><input class="cfg-input" data-col="9" value="' + escAttr(row[9] || '') + '" placeholder="' + escAttr(descPlaceholder) + '"></td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+    + '</tr>';
+}
+
+function addRulePresetRow() {
+  var key = (document.getElementById('rule-template-select').value || '').trim();
+  if (!key) return;
+  var catalog = (_configData && _configData.ruleCatalog) ? _configData.ruleCatalog : [];
+  var item = null;
+  catalog.forEach(function(rule) {
+    if (String(rule.key || '').trim().toUpperCase() === key.toUpperCase()) item = rule;
+  });
+  if (!item) {
+    item = {
+      key: key,
+      type: 'SYSTEM',
+      enabled: 'YES',
+      carrierScope: '',
+      condition1: '',
+      condition2: '',
+      issueLabel: key,
+      expectedValue: '',
+      actualSource: '',
+      description: ''
+    };
+  }
+
+  var row = [
+    item.key,
+    'SYSTEM',
+    document.getElementById('rule-template-enabled').value || item.enabled || 'YES',
+    (document.getElementById('rule-template-scope').value || '').trim() || item.carrierScope || '',
+    item.condition1 || '',
+    item.condition2 || '',
+    item.issueLabel || item.key,
+    item.expectedValue || '',
+    item.actualSource || '',
+    (document.getElementById('rule-template-desc').value || '').trim() || item.description || ''
+  ];
+
+  appendRuleConfigRow(row);
+  document.getElementById('rule-template-scope').value = '';
+  document.getElementById('rule-template-desc').value = '';
+}
+
+function buildRuleCondition(leftId, opId, rightId) {
+  var left = (document.getElementById(leftId).value || '').trim();
+  var op = (document.getElementById(opId).value || '').trim();
+  var right = (document.getElementById(rightId).value || '').trim();
+  if (!left || !op) return '';
+  if (op === 'BLANK' || op === 'NOT_BLANK') return left + ' ' + op;
+  return left + ' ' + op + (right ? ' ' + right : '');
+}
+
+function addCustomRuleRow() {
+  var key = (document.getElementById('custom-rule-key').value || '').trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+  if (!key) { alert('Enter a custom rule key.'); return; }
+
+  var condition1 = buildRuleCondition('custom-rule-left1', 'custom-rule-op1', 'custom-rule-right1');
+  var condition2 = buildRuleCondition('custom-rule-left2', 'custom-rule-op2', 'custom-rule-right2');
+  if (!condition1) { alert('Condition 1 is required for a custom rule.'); return; }
+
+  appendRuleConfigRow([
+    key,
+    'CUSTOM',
+    document.getElementById('custom-rule-enabled').value || 'YES',
+    (document.getElementById('custom-rule-scope').value || '').trim(),
+    condition1,
+    condition2,
+    (document.getElementById('custom-rule-issue').value || '').trim() || key,
+    (document.getElementById('custom-rule-expected').value || '').trim(),
+    (document.getElementById('custom-rule-actual').value || '').trim(),
+    (document.getElementById('custom-rule-desc').value || '').trim()
+  ]);
+
+  ['custom-rule-key','custom-rule-scope','custom-rule-issue','custom-rule-right1','custom-rule-expected','custom-rule-right2','custom-rule-actual','custom-rule-desc'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['custom-rule-left1','custom-rule-left2'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
+  ['custom-rule-op1','custom-rule-op2'].forEach(function(id, idx) {
+    var el = document.getElementById(id);
+    if (el) el.selectedIndex = idx === 0 ? 0 : 0;
+  });
+}
+
+function appendRuleConfigRow(row) {
+  var tbody = document.querySelector('#tbl-rules tbody');
+  if (!tbody) return;
+  var catalog = (_configData && _configData.ruleCatalog) ? getRuleCatalogMap(_configData.ruleCatalog) : {};
+  var tr = document.createElement('tr');
+  tr.innerHTML = ruleConfigRowHtml(row, catalog);
+  tbody.appendChild(tr);
+}
+
+function addRuleConfigRow() {
+  appendRuleConfigRow(['', 'CUSTOM', 'YES', '', '', '', '', '', '', '']);
+}
+
+function addCarrierConfigRow() {
+  var tbody = document.querySelector('#tbl-carrier tbody');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  var selHtml = '<select class="cfg-select" data-col="1">'
+    + '<option value="HB" selected>HB</option>'
+    + '<option value="CRE">CRE</option>'
+    + '<option value="SCH">SCH</option>'
+    + '</select>';
+  tr.innerHTML = '<td><input class="cfg-input mono" data-col="0" value=""></td>'
+    + '<td>' + selHtml + '</td>'
+    + '<td><input class="cfg-input mono" data-col="2" value=""></td>'
+    + '<td><input class="cfg-input" data-col="3" value=""></td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  tbody.appendChild(tr);
+}
+
+// ── ADDL COST CONFIG PANEL ────────────────────────────────
+function buildAddlCostConfigPanel(rows) {
+  if (!rows) return missingTabAlert('Addl Cost Config');
+
+  var html = '<p class="cfg-note">'
+    + 'Map invoice line-item descriptions to haulier <strong>Additional Cost</strong> sheet columns. '
+    + 'Add one <strong>Sheet</strong> row per Carrier/RDC pair to specify the haulier sheet tab name and the column that holds the week-ending date. '
+    + 'Add <strong>Mapping</strong> rows to map invoice description keywords to target column headers in that sheet. '
+    + 'Multiple Mapping rows sharing the same <em>Haulier Column</em> are summed (e.g. single-temp + multi-temp → Additional Trailers). '
+    + 'Keywords are matched case-insensitively against the invoice description.</p>'
+    + '<div style="margin-bottom:10px;padding:10px 12px;background:#f0f7ff;border:1px solid #b3d4f5;border-radius:6px;font-size:12px;color:#344563;">'
+    + '<strong>Quick Reference — CRE PYE items:</strong> '
+    + 'Additional Trailers (single-temp + multi-temp), 36\' Trailers, 48\' Trailers (multi+single), '
+    + 'Trailer Washouts, Third Structure Tax, Dry Vans, Scales, Shared Risk Credit'
+    + '</div>';
+
+  var typeOpts = ['Mapping', 'Sheet'];
+  var enabledOpts = ['YES', 'NO'];
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-addlcost">'
+    + '<thead><tr>'
+    + '<th style="width:90px;">Type</th>'
+    + '<th style="width:80px;">Carrier</th>'
+    + '<th style="width:70px;">RDC</th>'
+    + '<th>Invoice Keyword <span style="font-weight:400;color:#98a2b3;">(Mapping)</span> / Sheet Name <span style="font-weight:400;color:#98a2b3;">(Sheet)</span></th>'
+    + '<th>Haulier Column <span style="font-weight:400;color:#98a2b3;">(Mapping)</span> / Date Column <span style="font-weight:400;color:#98a2b3;">(Sheet)</span></th>'
+    + '<th style="width:70px;">Enabled</th>'
+    + '<th style="width:28px;"></th>'
+    + '</tr></thead>'
+    + '<tbody>';
+
+  (rows || []).forEach(function(row) {
+    var typeVal    = String(row[0] || 'Mapping').trim();
+    var enabledVal = String(row[5] || 'YES').trim();
+
+    var typeSelHtml = '<select class="cfg-select" data-col="0">';
+    typeOpts.forEach(function(opt) {
+      typeSelHtml += '<option value="' + esc(opt) + '"' + (typeVal.toLowerCase() === opt.toLowerCase() ? ' selected' : '') + '>' + esc(opt) + '</option>';
+    });
+    typeSelHtml += '</select>';
+
+    var enabledSelHtml = '<select class="cfg-select" data-col="5">';
+    enabledOpts.forEach(function(opt) {
+      enabledSelHtml += '<option value="' + esc(opt) + '"' + (enabledVal === opt ? ' selected' : '') + '>' + esc(opt) + '</option>';
+    });
+    enabledSelHtml += '</select>';
+
+    html += '<tr>'
+      + '<td>' + typeSelHtml + '</td>'
+      + '<td><input class="cfg-input mono" data-col="1" value="' + escAttr(row[1] || '') + '" style="text-transform:uppercase;"></td>'
+      + '<td><input class="cfg-input mono" data-col="2" value="' + escAttr(row[2] || '') + '" style="text-transform:uppercase;"></td>'
+      + '<td><input class="cfg-input" data-col="3" value="' + escAttr(row[3] || '') + '"></td>'
+      + '<td><input class="cfg-input" data-col="4" value="' + escAttr(row[4] || '') + '"></td>'
+      + '<td>' + enabledSelHtml + '</td>'
+      + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+      + '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('addlcost', 'Addl Cost Config', 6,
+    '<button class="btn btn-secondary" onclick="addAddlCostMappingRow()"><i class="fa-solid fa-plus"></i> Add Mapping</button>'
+    + ' <button class="btn btn-secondary" onclick="addAddlCostSheetRow()" style="margin-left:6px;"><i class="fa-solid fa-plus"></i> Add Sheet Config</button>');
+  return html;
+}
+
+function addAddlCostMappingRow() {
+  var tbody = document.querySelector('#tbl-addlcost tbody');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td><select class="cfg-select" data-col="0"><option value="Mapping" selected>Mapping</option><option value="Sheet">Sheet</option></select></td>'
+    + '<td><input class="cfg-input mono" data-col="1" value="" style="text-transform:uppercase;" placeholder="CRE"></td>'
+    + '<td><input class="cfg-input mono" data-col="2" value="" style="text-transform:uppercase;" placeholder="PYE"></td>'
+    + '<td><input class="cfg-input" data-col="3" value="" placeholder="invoice description keyword"></td>'
+    + '<td><input class="cfg-input" data-col="4" value="" placeholder="Haulier column header"></td>'
+    + '<td><select class="cfg-select" data-col="5"><option value="YES" selected>YES</option><option value="NO">NO</option></select></td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  tbody.appendChild(tr);
+}
+
+function addAddlCostSheetRow() {
+  var tbody = document.querySelector('#tbl-addlcost tbody');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td><select class="cfg-select" data-col="0"><option value="Mapping">Mapping</option><option value="Sheet" selected>Sheet</option></select></td>'
+    + '<td><input class="cfg-input mono" data-col="1" value="" style="text-transform:uppercase;" placeholder="CRE"></td>'
+    + '<td><input class="cfg-input mono" data-col="2" value="" style="text-transform:uppercase;" placeholder="PYE"></td>'
+    + '<td><input class="cfg-input" data-col="3" value="" placeholder="Additional Cost"></td>'
+    + '<td><input class="cfg-input" data-col="4" value="" placeholder="Week Ending"></td>'
+    + '<td><select class="cfg-select" data-col="5"><option value="YES" selected>YES</option><option value="NO">NO</option></select></td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  tbody.appendChild(tr);
 }
 
 // ── CONFIG EDITOR HELPERS ─────────────────────────────────
@@ -1210,8 +2023,608 @@ function saveCfgPanel(tableId, sheetName, numCols) {
     .saveConfigData(sheetName, rows);
 }
 
+// ── OUTPUT ROUTING PANEL ──────────────────────────────────
+function buildOutputRoutingPanel(rows) {
+  if (!rows) return missingTabAlert('Output Routing');
+  var html = '<p class="cfg-note">Route specific data outputs to different sheet names or even separate Google Spreadsheets. '
+    + 'Leave <strong>Target Spreadsheet ID</strong> blank to use the current workbook. '
+    + 'Set Enabled to <code>YES</code> or <code>NO</code>. New types like <strong>Backhaul Credits</strong> can be routed to their own sheet.</p>';
+
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-routing">'
+    + '<thead><tr><th>Data Type</th><th>Target Sheet Name</th><th>Target Spreadsheet ID</th><th>Enabled</th><th style="width:28px;"></th></tr></thead>'
+    + '<tbody>';
+  (rows || []).forEach(function(row) {
+    var enabledVal = String(row[3] || 'YES').trim().toUpperCase();
+    var selHtml = '<select class="cfg-select" data-col="3">'
+      + '<option value="YES"' + (enabledVal !== 'NO' && enabledVal !== 'FALSE' ? ' selected' : '') + '>YES</option>'
+      + '<option value="NO"' + (enabledVal === 'NO' || enabledVal === 'FALSE' ? ' selected' : '') + '>NO</option>'
+      + '</select>';
+    html += '<tr>'
+      + '<td><input class="cfg-input" data-col="0" value="' + escAttr(row[0] || '') + '"></td>'
+      + '<td><input class="cfg-input" data-col="1" value="' + escAttr(row[1] || '') + '"></td>'
+      + '<td><input class="cfg-input mono" data-col="2" value="' + escAttr(row[2] || '') + '" placeholder="Blank = current workbook"></td>'
+      + '<td>' + selHtml + '</td>'
+      + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('routing', 'Output Routing', 4,
+    '<button class="btn btn-secondary" onclick="addRoutingRow()"><i class="fa-solid fa-plus"></i> Add Route</button>');
+  return html;
+}
+
+function addRoutingRow() {
+  var tbody = document.querySelector('#tbl-routing tbody');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  var selHtml = '<select class="cfg-select" data-col="3">'
+    + '<option value="YES" selected>YES</option><option value="NO">NO</option></select>';
+  tr.innerHTML = '<td><input class="cfg-input" data-col="0" value=""></td>'
+    + '<td><input class="cfg-input" data-col="1" value=""></td>'
+    + '<td><input class="cfg-input mono" data-col="2" value="" placeholder="Blank = current workbook"></td>'
+    + '<td>' + selHtml + '</td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>';
+  tbody.appendChild(tr);
+}
+
+// ── INVOICE RESULTS VIEW ──────────────────────────────────
+var _invoiceResults = [];
+var _invoiceResultsFiltered = [];
+var _invoiceResultsTab = 'summary';
+
+document.getElementById('btn-load-results').addEventListener('click', loadInvoiceResults);
+document.getElementById('btn-inv-tab-summary').addEventListener('click', function() { switchInvoiceResultsTab('summary'); });
+document.getElementById('btn-inv-tab-view').addEventListener('click', function() { switchInvoiceResultsTab('view'); });
+
+function switchInvoiceResultsTab(tab) {
+  _invoiceResultsTab = (tab === 'view') ? 'view' : 'summary';
+  var summaryBtn = document.getElementById('btn-inv-tab-summary');
+  var viewBtn = document.getElementById('btn-inv-tab-view');
+  var summaryWrap = document.getElementById('inv-results-list');
+  var viewWrap = document.getElementById('inv-view-list');
+
+  if (summaryBtn) summaryBtn.classList.toggle('active', _invoiceResultsTab === 'summary');
+  if (viewBtn) viewBtn.classList.toggle('active', _invoiceResultsTab === 'view');
+  if (summaryWrap) summaryWrap.style.display = (_invoiceResultsTab === 'summary') ? 'block' : 'none';
+  if (viewWrap) viewWrap.style.display = (_invoiceResultsTab === 'view') ? 'block' : 'none';
+
+  renderInvoiceItemsTable(_invoiceResultsFiltered);
+}
+
+function loadInvoiceResults() {
+  var btn = document.getElementById('btn-load-results');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;';
+  google.script.run
+    .withSuccessHandler(function(data) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Refresh';
+      _invoiceResults = data || [];
+      populateInvoiceFilters(_invoiceResults);
+      filterInvoiceResults();
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Refresh';
+      document.getElementById('inv-results-list').innerHTML =
+        '<div class="alert-strip critical"><i class="fa-solid fa-circle-xmark"></i>'
+        + '<div><strong>Failed to load invoice results</strong> &mdash; ' + esc(e.message) + '</div></div>';
+    })
+    .getInvoiceResults();
+}
+
+function populateInvoiceFilters(results) {
+  var carriers = {}, rdcs = {};
+  results.forEach(function(r) {
+    if (r.carrier) carriers[r.carrier] = true;
+    if (r.rdc) rdcs[r.rdc] = true;
+  });
+  var cs = document.getElementById('inv-filter-carrier');
+  cs.innerHTML = '<option value="">All Carriers</option>'
+    + Object.keys(carriers).sort().map(function(c) {
+      return '<option value="' + esc(c) + '">' + esc(c) + '</option>';
+    }).join('');
+  var rs = document.getElementById('inv-filter-rdc');
+  rs.innerHTML = '<option value="">All RDCs</option>'
+    + Object.keys(rdcs).sort().map(function(r) {
+      return '<option value="' + esc(r) + '">' + esc(r) + '</option>';
+    }).join('');
+}
+
+document.getElementById('inv-filter-carrier').addEventListener('change', filterInvoiceResults);
+document.getElementById('inv-filter-rdc').addEventListener('change', filterInvoiceResults);
+document.getElementById('inv-filter-status').addEventListener('change', filterInvoiceResults);
+
+function filterInvoiceResults() {
+  var fc = document.getElementById('inv-filter-carrier').value;
+  var fr = document.getElementById('inv-filter-rdc').value;
+  var fs = document.getElementById('inv-filter-status').value;
+  var filtered = _invoiceResults.filter(function(r) {
+    if (fc && r.carrier !== fc) return false;
+    if (fr && r.rdc !== fr) return false;
+    if (fs === 'clean' && r.discrepancyCount > 0) return false;
+    if (fs === 'issues' && r.discrepancyCount === 0) return false;
+    return true;
+  });
+  _invoiceResultsFiltered = filtered;
+  renderInvoiceResults(filtered);
+  renderInvoiceItemsTable(filtered);
+}
+
+function renderInvoiceItemsTable(results) {
+  var container = document.getElementById('inv-view-list');
+  if (!container) return;
+
+  var flatRows = [];
+  (results || []).forEach(function(inv) {
+    (inv.items || []).forEach(function(item) {
+      flatRows.push({
+        carrier: inv.carrier || '',
+        rdc: inv.rdc || '',
+        date: item.date || '',
+        tu: item.tu || '',
+        shift: item.shift || '',
+        store: item.store || '',
+        deliveryType: item.deliveryType || '',
+        miles: Number(item.miles || 0),
+        tolls: Number(item.tolls || 0),
+        totalCost: Number(item.totalCost || 0),
+        tuMatch: item.tuMatch || '',
+        shiftMatch: item.shiftMatch || '',
+        storeMatch: item.storeMatch || '',
+        tourMatch: item.tourMatch || ''
+      });
+    });
+  });
+
+  if (!flatRows.length) {
+    container.innerHTML = '<div class="inv-empty"><i class="fa-solid fa-file-lines"></i>'
+      + '<div>No invoice line items match your current filters.</div></div>';
+    return;
+  }
+
+  var rowsHtml = flatRows.map(function(r) {
+    var bad = (String(r.tuMatch) !== 'YES') || (String(r.shiftMatch) !== 'MATCHED') || (String(r.storeMatch) !== 'MATCHED') || (String(r.tourMatch) !== 'MATCHED');
+    var bg = bad ? ' style="background:#fff5f5;"' : '';
+    return '<tr' + bg + '>'
+      + '<td>' + esc(r.carrier) + '</td>'
+      + '<td>' + esc(r.rdc) + '</td>'
+      + '<td>' + esc(r.date) + '</td>'
+      + '<td style="font-family:monospace;">' + esc(r.tu) + '</td>'
+      + '<td>' + esc(r.shift) + '</td>'
+      + '<td>' + esc(r.store) + '</td>'
+      + '<td>' + esc(r.deliveryType) + '</td>'
+      + '<td>' + r.miles.toLocaleString(undefined, {maximumFractionDigits: 2}) + '</td>'
+      + '<td>$' + r.tolls.toLocaleString(undefined, {minimumFractionDigits: 2}) + '</td>'
+      + '<td style="font-weight:600;">$' + r.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2}) + '</td>'
+      + '<td>' + esc(r.tuMatch) + '</td>'
+      + '<td>' + esc(r.shiftMatch) + '</td>'
+      + '<td>' + esc(r.storeMatch) + '</td>'
+      + '<td>' + esc(r.tourMatch) + '</td>'
+      + '</tr>';
+  }).join('');
+
+  container.innerHTML = '<div class="section-card" style="margin-bottom:0;">'
+    + '<div class="section-card-header"><span class="section-card-title"><i class="fa-solid fa-file-lines"></i> View Invoice Items</span>'
+    + '<span class="badge badge-neutral">' + flatRows.length + ' line item' + (flatRows.length === 1 ? '' : 's') + '</span></div>'
+    + '<div class="section-card-body" style="padding:0;overflow-x:auto;">'
+    + '<table class="data-table" style="font-size:11px;min-width:1280px;">'
+    + '<thead><tr>'
+    + '<th>Carrier</th><th>RDC</th><th>Date</th><th>TU</th><th>Shift</th><th>Store</th><th>Type</th><th>Miles</th><th>Tolls</th><th>Total</th><th>TU Match</th><th>Shift</th><th>Store</th><th>Tour</th>'
+    + '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div></div>';
+}
+
+function renderInvoiceResults(results) {
+  // Summary tiles
+  var totalInv = results.length;
+  var totalTUs = 0, totalMatched = 0, totalVal = 0, totalDisc = 0;
+  results.forEach(function(r) {
+    totalTUs += r.totalTUs;
+    totalMatched += r.matchedTUs;
+    totalVal += r.totalCost;
+    totalDisc += r.discrepancyCount;
+  });
+  document.getElementById('inv-total-count').textContent = totalInv;
+  document.getElementById('inv-total-tus').textContent = totalTUs.toLocaleString();
+  document.getElementById('inv-overall-match').textContent = totalTUs > 0 ? Math.round((totalMatched / totalTUs) * 100) + '%' : '—';
+  document.getElementById('inv-total-value').textContent = '$' + totalVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('inv-total-disc').textContent = totalDisc;
+
+  var container = document.getElementById('inv-results-list');
+  if (!results.length) {
+    container.innerHTML = '<div class="inv-empty"><i class="fa-solid fa-receipt"></i>'
+      + '<div>No invoice results yet. Run the processing engine first, then refresh.</div></div>';
+    return;
+  }
+
+  container.innerHTML = results.map(function(r, idx) {
+    var matchColor = r.matchRate >= 90 ? '#12b76a' : r.matchRate >= 70 ? '#f79009' : '#f04438';
+    var statusBadge = r.discrepancyCount === 0
+      ? '<span class="badge badge-success badge-dot">Clean</span>'
+      : '<span class="badge badge-danger badge-dot">' + r.discrepancyCount + ' issue' + (r.discrepancyCount > 1 ? 's' : '') + '</span>';
+
+    var html = '<div class="inv-result-card" style="margin-bottom:10px;">'
+      + '<div class="inv-result-header" onclick="toggleInvResult(' + idx + ')">'
+      + '<div>'
+      + '<div class="inv-result-carrier">' + esc(r.carrier) + ' <span style="font-weight:400;font-size:12px;color:#667085;">→</span> <span class="inv-result-rdc">' + esc(r.rdc) + '</span></div>'
+      + '<div style="margin-top:3px;">' + statusBadge + '</div>'
+      + '</div>'
+      + '<div class="inv-result-stats">'
+      + '<div class="inv-result-stat"><div class="inv-result-stat-val">' + r.totalTUs + '</div><div class="inv-result-stat-label">TUs</div></div>'
+      + '<div class="inv-result-stat"><div class="inv-result-stat-val" style="color:' + matchColor + '">' + r.matchRate + '%</div><div class="inv-result-stat-label">Match</div></div>'
+      + '<div class="inv-result-stat"><div class="inv-result-stat-val">$' + r.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2}) + '</div><div class="inv-result-stat-label">Value</div></div>'
+      + '<i class="fa-solid fa-chevron-right inv-chevron" id="inv-chev-' + idx + '"></i>'
+      + '</div></div>';
+
+    // Expandable detail body
+    html += '<div class="inv-result-body" id="inv-body-' + idx + '">';
+
+    // Financial breakdown
+    html += '<div class="inv-result-grid">'
+      + invMiniCard('Total Cost', '$' + r.totalCost.toLocaleString(undefined, {minimumFractionDigits: 2}), '')
+      + invMiniCard('Total Miles', r.totalMiles.toLocaleString(), '')
+      + invMiniCard('NY Pay', '$' + r.totalNY.toLocaleString(undefined, {minimumFractionDigits: 2}), '')
+      + invMiniCard('Tolls', '$' + r.totalTolls.toLocaleString(undefined, {minimumFractionDigits: 2}), '')
+      + '</div>';
+
+    // Match rate bars
+    html += '<div class="inv-section-title"><i class="fa-solid fa-chart-bar"></i> Matching Breakdown</div>';
+    html += matchBar('TU Match', r.matchRate);
+    html += matchBar('Shift', r.shiftMatchRate);
+    html += matchBar('Store', r.storeMatchRate);
+    html += matchBar('Tour', r.tourMatchRate);
+
+    // Delivery type breakdown
+    if (r.typeBreakdown && Object.keys(r.typeBreakdown).length > 0) {
+      html += '<div class="inv-section-title"><i class="fa-solid fa-truck"></i> Delivery Types</div>';
+      html += '<div class="inv-type-chips">';
+      for (var t in r.typeBreakdown) {
+        html += '<span class="inv-type-chip">' + esc(t) + ': ' + r.typeBreakdown[t] + '</span>';
+      }
+      html += '</div>';
+    }
+
+    // Additional costs
+    if (r.additionalCosts && r.additionalCosts.length > 0) {
+      html += '<div class="inv-section-title"><i class="fa-solid fa-coins"></i> Additional Costs ($' + r.additionalCostsTotal.toLocaleString(undefined, {minimumFractionDigits: 2}) + ')</div>';
+      html += '<table class="data-table" style="font-size:11px;">'
+        + '<thead><tr><th>Description</th><th>Amount</th><th>Source</th></tr></thead><tbody>';
+      r.additionalCosts.forEach(function(c) {
+        html += '<tr><td>' + esc(c.description) + '</td><td style="font-weight:600;">$' + c.amount.toLocaleString(undefined, {minimumFractionDigits: 2}) + '</td><td style="color:#667085;">' + esc(c.source) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    // Discrepancies
+    if (r.discrepancies && r.discrepancies.length > 0) {
+      html += '<div class="inv-section-title" style="color:#c01048;"><i class="fa-solid fa-triangle-exclamation"></i> Discrepancies (' + r.discrepancies.length + ')</div>';
+      html += '<table class="data-table" style="font-size:11px;">'
+        + '<thead><tr><th>Date</th><th>TU</th><th>Issue</th><th>Expected</th><th>Actual</th></tr></thead><tbody>';
+      r.discrepancies.forEach(function(d) {
+        html += '<tr><td>' + esc(d.date) + '</td><td style="font-family:monospace;">' + esc(d.tu) + '</td><td style="font-weight:600;color:#c01048;">' + esc(d.issue) + '</td><td>' + esc(d.expected) + '</td><td>' + esc(d.actual) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    html += '</div></div>';
+    return html;
+  }).join('');
+}
+
+function invMiniCard(label, val, sub) {
+  return '<div class="inv-mini-card"><div class="inv-mini-card-label">' + label + '</div>'
+    + '<div class="inv-mini-card-val">' + val + '</div>'
+    + (sub ? '<div class="inv-mini-card-sub">' + sub + '</div>' : '') + '</div>';
+}
+
+function matchBar(label, pct) {
+  var color = pct >= 90 ? '#12b76a' : pct >= 70 ? '#f79009' : '#f04438';
+  return '<div class="inv-match-bar">'
+    + '<div class="inv-match-bar-label">' + label + '</div>'
+    + '<div class="inv-match-bar-track"><div class="inv-match-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>'
+    + '<div class="inv-match-bar-pct" style="color:' + color + ';">' + pct + '%</div></div>';
+}
+
+function toggleInvResult(idx) {
+  var body = document.getElementById('inv-body-' + idx);
+  var chev = document.getElementById('inv-chev-' + idx);
+  if (body) {
+    var isOpen = body.classList.contains('open');
+    body.classList.toggle('open');
+    if (chev) chev.classList.toggle('open');
+  }
+}
+
 // ── REFRESH ───────────────────────────────────────────
 document.getElementById('btn-refresh').addEventListener('click', init);
+
+// ── INVOICE FINALIZATION ────────────────────────────────────
+function loadFinalizationData() {
+  logMsg('Loading pending invoice GL codes...', 'info');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (!res.success) {
+        document.getElementById('fin-status-msg').textContent = res.message || 'No pending invoices found';
+        return;
+      }
+      _currentFinalization = res;
+      renderFinalizationUI(res);
+      loadGLCodeTemplates();
+      logMsg('Loaded GL codes for ' + res.invoiceFileName, 'success');
+    })
+    .withFailureHandler(function(e) {
+      logMsg('Failed to load finalization data: ' + e.message, 'error');
+    })
+    .getPendingInvoiceGLCodes('');
+}
+
+function loadGLCodeTemplates() {
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.success) {
+        _glCodeTemplates = res.templates || [];
+        populateGLTemplateDropdown();
+      }
+    })
+    .withFailureHandler(function(e) {
+      logMsg('Failed to load GL templates: ' + e.message, 'error');
+    })
+    .getGLCodeTemplates();
+}
+
+function getFinalizationMeta() {
+  return (_currentFinalization && _currentFinalization.allocationMeta) ? _currentFinalization.allocationMeta : {};
+}
+
+function glFirstCode(glCode) {
+  return String(glCode || '').split(',')[0].trim();
+}
+
+function isImportGlCode(glCode) {
+  var meta = getFinalizationMeta();
+  return glFirstCode(glCode) === glFirstCode(meta.importPrefix || '471003');
+}
+
+function isSelfPickupGlCode(glCode) {
+  var meta = getFinalizationMeta();
+  return glFirstCode(glCode) === glFirstCode(meta.selfPickupPrefix || '360100');
+}
+
+function isSpecialReallocCode(glCode) {
+  return isImportGlCode(glCode) || isSelfPickupGlCode(glCode);
+}
+
+function findBaseFreightIndex() {
+  if (!_currentFinalization || !_currentFinalization.codes) return -1;
+  var meta = getFinalizationMeta();
+  var targetBase = glFirstCode(meta.basePrefix || '471000');
+  var idx = -1;
+  var largest = -1;
+
+  _currentFinalization.codes.forEach(function(c, i) {
+    if (glFirstCode(c.glCode) !== targetBase) return;
+    var amt = Number(c.amount || 0);
+    if (amt > largest) {
+      largest = amt;
+      idx = i;
+    }
+  });
+
+  return idx;
+}
+
+function normalizeSpecialCodeWithCostCenter(code) {
+  var raw = String(code || '').trim();
+  if (!raw) return '';
+
+  var meta = getFinalizationMeta();
+  var cc = String(meta.costCenter || '').trim();
+  if (!cc) return raw;
+
+  var first = glFirstCode(raw);
+  var importFirst = glFirstCode(meta.importPrefix || '471003');
+  var selfFirst = glFirstCode(meta.selfPickupPrefix || '360100');
+  if (first !== importFirst && first !== selfFirst) return raw;
+
+  var parts = raw.split(',').map(function(p) { return String(p || '').trim(); }).filter(Boolean);
+  if (parts.length >= 2 && parts[parts.length - 1] === cc) return raw;
+  return first + ', ' + cc;
+}
+
+function applySpecialDeltaToBase(changedIdx, oldAmt, newAmt) {
+  if (!_currentFinalization || !_currentFinalization.codes || !_currentFinalization.codes[changedIdx]) return newAmt;
+  var row = _currentFinalization.codes[changedIdx];
+  if (!isSpecialReallocCode(row.glCode)) return newAmt;
+
+  var delta = Number(newAmt || 0) - Number(oldAmt || 0);
+  if (Math.abs(delta) < 0.0001) return newAmt;
+
+  var baseIdx = findBaseFreightIndex();
+  if (baseIdx < 0 || baseIdx === changedIdx || !_currentFinalization.codes[baseIdx]) return newAmt;
+
+  var baseAmt = Number(_currentFinalization.codes[baseIdx].amount || 0);
+  if (delta > 0 && delta > baseAmt) {
+    newAmt = Number(oldAmt || 0) + baseAmt;
+    delta = newAmt - Number(oldAmt || 0);
+  }
+
+  _currentFinalization.codes[baseIdx].amount = Math.max(0, baseAmt - delta);
+  return newAmt;
+}
+
+function refreshGLAmountInputsFromState() {
+  if (!_currentFinalization || !_currentFinalization.codes) return;
+  document.querySelectorAll('#fin-gl-codes input[type="number"]').forEach(function(inp) {
+    var idx = parseInt(inp.dataset.idx, 10);
+    if (isNaN(idx) || !_currentFinalization.codes[idx]) return;
+    inp.value = Number(_currentFinalization.codes[idx].amount || 0).toFixed(2);
+  });
+}
+
+function onGLAmountInput(ev) {
+  if (!_currentFinalization || !_currentFinalization.codes) return;
+  var inp = ev && ev.target ? ev.target : null;
+  if (!inp) return;
+
+  var idx = parseInt(inp.dataset.idx, 10);
+  if (isNaN(idx) || !_currentFinalization.codes[idx]) return;
+
+  var oldAmt = Number(_currentFinalization.codes[idx].amount || 0);
+  var proposed = Number(inp.value || 0);
+  if (!isFinite(proposed) || proposed < 0) proposed = 0;
+
+  var adjusted = applySpecialDeltaToBase(idx, oldAmt, proposed);
+  _currentFinalization.codes[idx].amount = adjusted;
+
+  refreshGLAmountInputsFromState();
+  updateGLTotal();
+}
+
+function renderFinalizationUI(data) {
+  document.getElementById('fin-invoice-file').textContent = data.invoiceFileName || '&#8212;';
+  document.getElementById('fin-invoice-rdc').textContent = data.rdc || '&#8212;';
+  document.getElementById('fin-invoice-num').textContent = data.invoiceNumber || '&#8212;';
+  document.getElementById('fin-invoice-total').textContent = '$' + Number(data.totalAmount || 0).toFixed(2);
+
+  var codesHtml = '';
+  var total = 0;
+  (data.codes || []).forEach(function(code, idx) {
+    total += Number(code.amount || 0);
+    codesHtml += '<div class="gl-code-row">'
+      + '<div><div class="gl-code-col-label">GL Code</div><div class="gl-code-col-value">' + esc(code.glCode) + '</div></div>'
+      + '<div><div class="gl-code-col-label">Amount</div>'
+      + '<div class="gl-code-amount"><input type="number" data-idx="' + idx + '" value="' + Number(code.amount || 0).toFixed(2) + '" step="0.01" min="0"></div></div>'
+      + '<button class="gl-del-btn-small" data-idx="' + idx + '" title="Delete this GL code"><i class="fa-solid fa-times"></i></button>'
+      + '</div>';
+  });
+  document.getElementById('fin-gl-codes').innerHTML = codesHtml;
+  document.getElementById('fin-gl-total').textContent = '$' + total.toFixed(2);
+
+  // Attach event listeners to amount inputs
+  document.querySelectorAll('#fin-gl-codes input[type="number"]').forEach(function(inp) {
+    inp.addEventListener('input', onGLAmountInput);
+    inp.addEventListener('change', onGLAmountInput);
+  });
+
+  // Attach event listeners to delete buttons
+  document.querySelectorAll('.gl-del-btn-small').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(btn.dataset.idx);
+      if (!isNaN(idx) && _currentFinalization && _currentFinalization.codes && _currentFinalization.codes[idx]) {
+        var removed = _currentFinalization.codes[idx];
+        if (isSpecialReallocCode(removed.glCode)) {
+          var baseIdx = findBaseFreightIndex();
+          if (baseIdx >= 0 && baseIdx !== idx && _currentFinalization.codes[baseIdx]) {
+            _currentFinalization.codes[baseIdx].amount = Number(_currentFinalization.codes[baseIdx].amount || 0) + Number(removed.amount || 0);
+          }
+        }
+      }
+      _currentFinalization.codes.splice(idx, 1);
+      renderFinalizationUI(_currentFinalization);
+    });
+  });
+}
+
+function updateGLTotal() {
+  var total = 0;
+  (_currentFinalization && _currentFinalization.codes ? _currentFinalization.codes : []).forEach(function(c) {
+    total += Number(c.amount || 0);
+  });
+  document.getElementById('fin-gl-total').textContent = '$' + total.toFixed(2);
+}
+
+function populateGLTemplateDropdown() {
+  var sel = document.getElementById('fin-gl-template');
+  var opts = '<option value="">-- Quick Select Template --</option>';
+  _glCodeTemplates.forEach(function(t) {
+    if (t.quickSelect !== false) {
+      opts += '<option value="' + esc(t.code) + '">' + esc(t.name) + ' (' + esc(t.code) + ')</option>';
+    }
+  });
+  sel.innerHTML = opts;
+}
+
+function addGLCode() {
+  var templateSel = document.getElementById('fin-gl-template');
+  var amountInp = document.getElementById('fin-gl-amount');
+  var code = templateSel.value || prompt('Enter GL Code / Cost Center String:');
+  var amount = parseFloat(amountInp.value) || 0;
+  if (amount < 0) amount = 0;
+
+  if (!code) {
+    alert('Please select a template or enter a GL code');
+    return;
+  }
+
+  if (_currentFinalization) {
+    code = normalizeSpecialCodeWithCostCenter(code);
+    var newIdx = _currentFinalization.codes.length;
+    _currentFinalization.codes.push({ glCode: code, amount: 0, editable: true });
+    var adjustedAmount = applySpecialDeltaToBase(newIdx, 0, amount);
+    _currentFinalization.codes[newIdx].amount = adjustedAmount;
+    renderFinalizationUI(_currentFinalization);
+    templateSel.value = '';
+    amountInp.value = '';
+  }
+}
+
+function saveGLCodes() {
+  if (!_currentFinalization) {
+    alert('No invoice loaded');
+    return;
+  }
+
+  // Collect updated amounts from the UI
+  document.querySelectorAll('#fin-gl-codes input[type="number"]').forEach(function(inp) {
+    var idx = parseInt(inp.dataset.idx);
+    if (_currentFinalization.codes[idx]) {
+      _currentFinalization.codes[idx].amount = Math.max(0, parseFloat(inp.value) || 0);
+      _currentFinalization.codes[idx].glCode = normalizeSpecialCodeWithCostCenter(_currentFinalization.codes[idx].glCode);
+    }
+  });
+
+  var btn = document.getElementById('btn-save-gl-codes');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Save GL Code Changes';
+      if (res.success) {
+        logMsg(res.message, 'success');
+        document.getElementById('fin-status-msg').textContent = 'Changes saved successfully';
+        setTimeout(function() { document.getElementById('fin-status-msg').textContent = ''; }, 3000);
+      } else {
+        alert('Error: ' + res.message);
+      }
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Save GL Code Changes';
+      logMsg('Save failed: ' + e.message, 'error');
+    })
+    .updatePendingInvoiceGLCodes(_currentFinalization.invoiceFileName, _currentFinalization.codes);
+}
+
+// Attach button listeners for finalization
+if (document.getElementById('btn-reload-finalization')) {
+  document.getElementById('btn-reload-finalization').addEventListener('click', loadFinalizationData);
+}
+if (document.getElementById('btn-add-gl-code')) {
+  document.getElementById('btn-add-gl-code').addEventListener('click', addGLCode);
+}
+if (document.getElementById('btn-save-gl-codes')) {
+  document.getElementById('btn-save-gl-codes').addEventListener('click', saveGLCodes);
+}
+if (document.getElementById('btn-cancel-finalization')) {
+  document.getElementById('btn-cancel-finalization').addEventListener('click', function() {
+    _currentFinalization = null;
+    document.getElementById('fin-gl-codes').innerHTML = '';
+    document.getElementById('fin-status-msg').textContent = '';
+    switchView('results');
+  });
+}
 
 // ── BOOT ───────────────────────────────────────────────
 window.onload = function() {
