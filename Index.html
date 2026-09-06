@@ -283,6 +283,60 @@
     .inv-info-label { font-size: 10px; font-weight: 600; color: #667085; text-transform: uppercase; margin-bottom: 4px; }
     .inv-info-value { font-size: 16px; font-weight: 600; color: #1d2939; }
 
+    /* ===== TOASTS ===== */
+    #toast-stack { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; max-width: 380px; }
+    .toast { background: #1d2939; color: #f2f4f7; padding: 10px 14px; border-radius: 6px; font-size: 12px; box-shadow: 0 8px 24px rgba(16,24,40,0.25); border-left: 4px solid #2e90fa; display: flex; gap: 10px; align-items: flex-start; animation: toast-in 0.2s ease-out; line-height: 1.45; }
+    .toast.success { border-left-color: #12b76a; }
+    .toast.warning { border-left-color: #f79009; }
+    .toast.error   { border-left-color: #f04438; }
+    .toast i { margin-top: 2px; }
+    .toast.hide { opacity: 0; transition: opacity 0.3s; }
+    @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    /* ===== STATUS PILLS ===== */
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
+    .pill-coded { background: #ecfdf3; color: #027a48; }
+    .pill-discrepancy { background: #fff1f3; color: #c01048; }
+    .pill-pending_review { background: #eff8ff; color: #175cd3; }
+    .pill-needs_review, .pill-error { background: #fffaeb; color: #b54708; }
+    .pill-duplicate, .pill-skipped { background: #f2f4f7; color: #475467; }
+    .pill-resolved { background: #f0fdf9; color: #0d9488; }
+    .pill-on  { background: #ecfdf3; color: #027a48; }
+    .pill-off { background: #f2f4f7; color: #667085; }
+
+    /* ===== AUTOMATION ===== */
+    .auto-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .auto-stat { background: #f9fafb; border: 1px solid #f2f4f7; border-radius: 4px; padding: 10px 12px; }
+    .auto-stat-label { font-size: 10px; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .auto-stat-value { font-size: 14px; font-weight: 600; color: #1d2939; word-break: break-word; }
+    .auto-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .auto-two-col { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(0, 1.5fr); gap: 14px; }
+    .auto-two-col > .section-card { min-width: 0; }
+    @media (max-width: 1100px) { .auto-two-col { grid-template-columns: 1fr; } }
+    .settings-field label { font-size: 11px; font-weight: 600; color: #475467; display: block; margin-bottom: 3px; }
+    .settings-field .help { font-size: 10px; color: #98a2b3; margin-top: 3px; line-height: 1.4; }
+    .log-table td { font-family: 'Fira Code', 'Courier New', monospace; font-size: 11px; vertical-align: top; }
+    .log-level-error { color: #c01048; font-weight: 700; }
+    .log-level-warning { color: #b54708; font-weight: 700; }
+    .log-level-info { color: #475467; }
+    .topbar-auto { display: none; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #e4e7ec; background: #f9fafb; color: #475467; cursor: pointer; }
+    .topbar-auto.on { background: #ecfdf3; color: #027a48; border-color: #a9efc5; }
+    .topbar-auto.off { background: #fffaeb; color: #b54708; border-color: #fedf89; }
+    .sidebar-count { margin-left: auto; background: #c01048; color: white; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; display: none; }
+
+    /* ===== REGISTER ===== */
+    .register-table td { white-space: nowrap; }
+    .register-table td.wrap { white-space: normal; min-width: 180px; max-width: 320px; }
+    .register-table .num { text-align: right; font-family: 'Courier New', monospace; }
+    .reg-link { color: #0070c0; font-weight: 500; }
+    .reg-link:hover { text-decoration: underline; }
+    .reg-actions { display: flex; gap: 4px; }
+    .btn-xs { padding: 3px 8px; font-size: 11px; }
+    .search-input { padding: 5px 10px; border: 1px solid #d0d5dd; border-radius: 4px; font-size: 12px; min-width: 200px; }
+    .skeleton { background: linear-gradient(90deg, #f2f4f7 25%, #e4e7ec 50%, #f2f4f7 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 4px; height: 14px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 900px) {
       #sidebar { width: 52px; }
@@ -311,6 +365,8 @@
     <div class="sidebar-nav">
       <div class="sidebar-section-label">Operations</div>
       <div class="nav-item active" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></div>
+      <div class="nav-item" data-view="automation"><i class="fa-solid fa-robot"></i><span>Automation</span></div>
+      <div class="nav-item" data-view="register"><i class="fa-solid fa-list-check"></i><span>Invoice Register</span><span class="sidebar-count" id="nav-register-count">0</span></div>
       <div class="nav-item" data-view="operations"><i class="fa-solid fa-gears"></i><span>Operations</span></div>
       <div class="nav-item" data-view="processing"><i class="fa-solid fa-bolt"></i><span>Processing</span></div>
       <div class="nav-item" data-view="finalization"><i class="fa-solid fa-check-double"></i><span>Invoice Finalization</span></div>
@@ -331,6 +387,7 @@
     <!-- TOP BAR -->
     <header id="topbar">
       <div class="topbar-title" id="topbar-view-title">Dashboard</div>
+      <div id="topbar-automation" class="topbar-auto" title="Open the Automation view" onclick="switchView('automation')"></div>
       <div id="topbar-readiness" class="readiness-chip mid" style="display:none"><i class="fa-solid fa-shield-check"></i><span>&#8212;%</span></div>
       <button class="btn-icon" id="btn-refresh" title="Refresh dashboard"><i class="fa-solid fa-rotate-right" id="refresh-icon"></i></button>
     </header>
@@ -341,14 +398,15 @@
         <i class="fa-solid fa-microchip" style="color:#667085;"></i>
         <span style="font-size:12px;font-weight:600;color:#1d2939;">Engine Controls</span>
       </div>
-      <button id="btn-run" class="btn btn-primary" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-arrow-down-to-bracket"></i> Extract &amp; Load Invoices</button>
-      <button id="btn-clear" class="btn btn-danger" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear</button>
-      <button id="btn-init" class="btn btn-success" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize Config</button>
+      <button id="btn-run" data-action="run" class="btn btn-primary" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-arrow-down-to-bracket"></i> Extract &amp; Load Invoices</button>
+      <button id="btn-auto-cycle-top" data-action="cycle" class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" title="Scan inbox + process + reply, exactly like the schedule does"><i class="fa-solid fa-robot"></i> Run Automation Cycle</button>
+      <button id="btn-clear" data-action="clear" class="btn btn-danger" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear</button>
+      <button id="btn-init" data-action="init" class="btn btn-success" style="padding:6px 12px;font-size:12px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize Config</button>
       <div style="flex:1;"></div>
-      <div id="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:5px 8px;">
-        <i class="fa-regular fa-clock" style="margin-right:4px;"></i><span id="engine-last-msg"></span>
+      <div id="engine-last-run" class="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:5px 8px;">
+        <i class="fa-regular fa-clock" style="margin-right:4px;"></i><span class="engine-last-msg"></span>
       </div>
-      <div class="progress-bar-wrap" id="engine-progress-wrap" style="display:none;width:200px;margin-left:8px;">
+      <div class="progress-bar-wrap engine-progress" id="engine-progress-wrap" style="display:none;width:200px;margin-left:8px;">
         <div class="progress-bar animated" style="width:100%"></div>
       </div>
     </div>
@@ -388,6 +446,34 @@
           </div>
         </div>
 
+        <!-- Invoice Register KPI Row -->
+        <div class="kpi-grid">
+          <div class="kpi-tile" style="cursor:pointer;" onclick="switchView('register')">
+            <div class="kpi-tile-icon kpi-icon-blue"><i class="fa-solid fa-list-check"></i></div>
+            <div class="kpi-tile-label">Invoices Registered</div>
+            <div class="kpi-tile-value" id="kpi-reg-total">&#8212;</div>
+            <div class="kpi-tile-sub">All carriers, all weeks</div>
+          </div>
+          <div class="kpi-tile" style="cursor:pointer;" onclick="switchView('register')">
+            <div class="kpi-tile-icon kpi-icon-teal"><i class="fa-solid fa-calendar-week"></i></div>
+            <div class="kpi-tile-label">This Week</div>
+            <div class="kpi-tile-value" id="kpi-reg-week">&#8212;</div>
+            <div class="kpi-tile-sub">Invoices dated in the current week</div>
+          </div>
+          <div class="kpi-tile" style="cursor:pointer;" onclick="switchView('register')">
+            <div class="kpi-tile-icon kpi-icon-red"><i class="fa-solid fa-reply"></i></div>
+            <div class="kpi-tile-label">Awaiting Carrier Reply</div>
+            <div class="kpi-tile-value" id="kpi-reg-awaiting">&#8212;</div>
+            <div class="kpi-tile-sub">Open discrepancy notices</div>
+          </div>
+          <div class="kpi-tile" style="cursor:pointer;" onclick="switchView('register')">
+            <div class="kpi-tile-icon kpi-icon-amber"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <div class="kpi-tile-label">Needs Review</div>
+            <div class="kpi-tile-value" id="kpi-reg-review">&#8212;</div>
+            <div class="kpi-tile-sub">Unknown RDC or processing errors</div>
+          </div>
+        </div>
+
         <!-- Carriers + Readiness -->
         <div class="two-col">
           <div class="section-card">
@@ -419,6 +505,20 @@
                 <tr><td style="color:#667085">Discrepancy rate</td><td style="text-align:right;font-weight:600;" id="rd-disc-rate">&#8212;</td></tr>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- Recent invoices -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Invoices</span>
+            <button class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="switchView('register')">Open Register</button>
+          </div>
+          <div class="section-card-body" style="padding:0;overflow-x:auto;">
+            <table class="data-table" id="recent-invoices-table" style="font-size:11px;">
+              <thead><tr><th>Registered</th><th>Carrier</th><th>RDC</th><th>Week</th><th>Invoice #</th><th>File</th><th style="text-align:right;">Total</th><th>Status</th></tr></thead>
+              <tbody><tr><td colspan="8" style="color:#98a2b3;padding:14px 12px;font-size:12px;">Loading&#8230;</td></tr></tbody>
+            </table>
           </div>
         </div>
 
@@ -473,17 +573,19 @@
               <span class="section-card-title"><i class="fa-solid fa-microchip"></i> Engine Controls</span>
             </div>
             <div class="section-card-body" style="display:flex;flex-direction:column;gap:12px;">
-              <p style="font-size:12px;color:#667085;line-height:1.6;"><strong>Step 1 — Extract:</strong> Load invoice data from all configured root folders. Review and edit extracted invoices in the <em>Invoice Finalization</em> view, then return here to finalize and generate GL codes.</p>
-              <div id="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:8px 10px;">
-                <i class="fa-regular fa-clock" style="margin-right:5px;"></i><span id="engine-last-msg"></span>
+              <p style="font-size:12px;color:#667085;line-height:1.6;"><strong>Manual extract:</strong> load invoice data from all configured root folders into the finalization queue, review GL codes in <em>Invoice Finalization</em>, then finalize.
+                <strong>Automation cycle:</strong> scan the inbox, process everything hands-free and reply to carriers, exactly like the schedule in the <em>Automation</em> view.</p>
+              <div id="engine-last-run-ops" class="engine-last-run" style="display:none;font-size:11px;color:#98a2b3;background:#f9fafb;border:1px solid #f2f4f7;border-radius:3px;padding:8px 10px;">
+                <i class="fa-regular fa-clock" style="margin-right:5px;"></i><span class="engine-last-msg"></span>
               </div>
-              <div class="progress-bar-wrap" id="engine-progress-wrap" style="display:none;">
+              <div class="progress-bar-wrap engine-progress" id="engine-progress-wrap-ops" style="display:none;">
                 <div class="progress-bar animated" style="width:100%"></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:8px;margin-top:auto;">
-                <button id="btn-run" class="btn btn-primary btn-full btn-lg"><i class="fa-solid fa-arrow-down-to-bracket"></i> Extract & Load Invoices</button>
-                <button id="btn-clear" class="btn btn-danger btn-full"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker</button>
-                <button id="btn-init" class="btn btn-success btn-full"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize / Repair Config</button>
+                <button id="btn-run-ops" data-action="run" class="btn btn-primary btn-full btn-lg"><i class="fa-solid fa-arrow-down-to-bracket"></i> Extract &amp; Load Invoices</button>
+                <button id="btn-cycle-ops" data-action="cycle" class="btn btn-secondary btn-full"><i class="fa-solid fa-robot"></i> Run Automation Cycle</button>
+                <button id="btn-clear-ops" data-action="clear" class="btn btn-danger btn-full"><i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker</button>
+                <button id="btn-init-ops" data-action="init" class="btn btn-success btn-full"><i class="fa-solid fa-wand-magic-sparkles"></i> Initialize / Repair Config</button>
               </div>
             </div>
           </div>
@@ -706,6 +808,144 @@
       </div>
     </section>
 
+    <!-- ══════════════ VIEW: AUTOMATION ══════════════ -->
+    <section class="view" id="view-automation">
+      <div class="view-body">
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-robot"></i> Hands-free Processing</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span id="auto-enabled-pill" class="pill pill-off">Unknown</span>
+              <button class="btn btn-secondary btn-xs" id="btn-auto-refresh"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+            </div>
+          </div>
+          <div class="section-card-body">
+            <p style="font-size:12px;color:#667085;line-height:1.6;margin-bottom:12px;">
+              Every cycle scans Gmail for carrier invoice emails, drops the attachments into the carrier folder, files each invoice under its RDC with the week number in the name,
+              reconciles it against the haulier report, codes it (or queues it for review), records it in the <strong>Invoice Register</strong> and replies to the carrier's own email thread when there are discrepancies.
+            </p>
+            <div class="auto-status-grid" id="auto-status-grid">
+              <div class="auto-stat"><div class="auto-stat-label">Schedule</div><div class="auto-stat-value" id="auto-trigger">&#8212;</div></div>
+              <div class="auto-stat"><div class="auto-stat-label">Last cycle</div><div class="auto-stat-value" id="auto-last-run">&#8212;</div></div>
+              <div class="auto-stat"><div class="auto-stat-label">Next cycle (approx.)</div><div class="auto-stat-value" id="auto-next-run">&#8212;</div></div>
+              <div class="auto-stat"><div class="auto-stat-label">Coding mode</div><div class="auto-stat-value" id="auto-mode">&#8212;</div></div>
+              <div class="auto-stat"><div class="auto-stat-label">Discrepancy replies</div><div class="auto-stat-value" id="auto-send">&#8212;</div></div>
+              <div class="auto-stat"><div class="auto-stat-label">Gmail account</div><div class="auto-stat-value" id="auto-account" style="font-size:12px;">&#8212;</div></div>
+            </div>
+            <div id="auto-last-summary" style="font-size:12px;color:#475467;margin-top:12px;display:none;padding:10px 12px;background:#f9fafb;border:1px solid #e4e7ec;border-radius:4px;line-height:1.5;"></div>
+            <div class="auto-actions">
+              <button class="btn btn-primary" id="btn-auto-run"><i class="fa-solid fa-play"></i> Run Cycle Now</button>
+              <button class="btn btn-secondary" id="btn-auto-scan"><i class="fa-solid fa-envelope-open-text"></i> Scan Inbox Only</button>
+              <button class="btn btn-success" id="btn-auto-install"><i class="fa-solid fa-clock"></i> Install / Update Schedule</button>
+              <button class="btn btn-danger" id="btn-auto-remove"><i class="fa-solid fa-ban"></i> Remove Schedule</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="auto-two-col">
+          <div class="section-card">
+            <div class="section-card-header">
+              <span class="section-card-title"><i class="fa-solid fa-sliders"></i> Automation Settings</span>
+              <button class="btn btn-primary btn-xs" id="btn-auto-save-settings"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+            </div>
+            <div class="section-card-body">
+              <div class="settings-grid" id="auto-settings-form">
+                <div style="color:#98a2b3;font-size:12px;">Loading&#8230;</div>
+              </div>
+              <div id="auto-settings-status" style="font-size:12px;margin-top:10px;color:#667085;"></div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-card-header">
+              <span class="section-card-title"><i class="fa-solid fa-envelope"></i> Email Ingest Rules</span>
+              <button class="btn btn-primary btn-xs" id="btn-auto-save-ingest"><i class="fa-solid fa-floppy-disk"></i> Save Rules</button>
+            </div>
+            <div class="section-card-body">
+              <p class="cfg-note">Tell IMT which sender belongs to which carrier. <strong>Sender Match</strong> accepts full addresses or domains (e.g. <code>billing@hbtrucking.com, hbtrucking.com</code>).
+                Subject / attachment keywords are optional fallbacks. <strong>Reply-To Override</strong> is used for discrepancy notices when an invoice did not arrive by email.</p>
+              <div style="overflow-x:auto;">
+                <table class="cfg-edit-table" id="tbl-ingest">
+                  <thead><tr><th>Carrier</th><th>Sender Match</th><th>Subject Keywords</th><th>Attachment Keywords</th><th>Reply-To Override</th><th>Enabled</th><th style="width:28px;"></th></tr></thead>
+                  <tbody><tr><td colspan="7" style="color:#98a2b3;font-size:12px;">Loading&#8230;</td></tr></tbody>
+                </table>
+              </div>
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+                <button class="btn btn-secondary btn-xs" onclick="addIngestRow()"><i class="fa-solid fa-plus"></i> Add Carrier</button>
+                <span id="auto-ingest-status" style="font-size:12px;color:#667085;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-list-ul"></i> Activity Log</span>
+            <span class="badge badge-neutral" id="auto-log-count">0 entries</span>
+          </div>
+          <div class="section-card-body" style="padding:0;overflow-x:auto;">
+            <table class="data-table log-table" id="auto-log-table">
+              <thead><tr><th style="width:120px;">Time</th><th style="width:70px;">Level</th><th style="width:220px;">Event</th><th>Detail</th></tr></thead>
+              <tbody><tr><td colspan="4" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No activity yet.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════ VIEW: INVOICE REGISTER ══════════════ -->
+    <section class="view" id="view-register">
+      <div class="view-body">
+
+        <div class="inv-summary-row">
+          <div class="inv-summary-tile"><div class="inv-summary-tile-label">Invoices Registered</div><div class="inv-summary-tile-val" id="reg-total">&#8212;</div></div>
+          <div class="inv-summary-tile"><div class="inv-summary-tile-label">This Week</div><div class="inv-summary-tile-val" id="reg-this-week">&#8212;</div></div>
+          <div class="inv-summary-tile"><div class="inv-summary-tile-label">Coded</div><div class="inv-summary-tile-val" id="reg-coded" style="color:#027a48;">&#8212;</div></div>
+          <div class="inv-summary-tile"><div class="inv-summary-tile-label">Awaiting Carrier Reply</div><div class="inv-summary-tile-val" id="reg-awaiting" style="color:#c01048;">&#8212;</div></div>
+          <div class="inv-summary-tile"><div class="inv-summary-tile-label">Needs Review</div><div class="inv-summary-tile-val" id="reg-review" style="color:#b54708;">&#8212;</div></div>
+        </div>
+
+        <div class="inv-filter-bar">
+          <label>Filter:</label>
+          <select id="reg-filter-carrier"><option value="">All Carriers</option></select>
+          <select id="reg-filter-rdc"><option value="">All RDCs</option></select>
+          <select id="reg-filter-week"><option value="">All Weeks</option></select>
+          <select id="reg-filter-status">
+            <option value="">All Statuses</option>
+            <option value="CODED">Coded</option>
+            <option value="DISCREPANCY">Discrepancy</option>
+            <option value="PENDING_REVIEW">Pending Review</option>
+            <option value="NEEDS_REVIEW">Needs Review</option>
+            <option value="ERROR">Error</option>
+            <option value="DUPLICATE">Duplicate</option>
+            <option value="SKIPPED">Skipped</option>
+            <option value="RESOLVED">Resolved</option>
+          </select>
+          <input class="search-input" id="reg-search" placeholder="Search invoice #, file, sender&hellip;">
+          <div style="flex:1;"></div>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:12px;" id="btn-reg-refresh"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="section-card-title"><i class="fa-solid fa-list-check"></i> Invoice Register</span>
+            <span class="badge badge-neutral" id="reg-count-badge">0 invoices</span>
+          </div>
+          <div class="section-card-body" style="padding:0;overflow-x:auto;">
+            <table class="data-table register-table" id="register-table" style="font-size:11px;min-width:1300px;">
+              <thead><tr>
+                <th>Registered</th><th>Carrier</th><th>RDC</th><th>Week</th><th>Invoice #</th><th>File</th><th class="num">Total</th><th class="num">TUs</th><th class="num">Issues</th><th>Status</th><th>Source Email</th><th>Discrepancy Notice</th><th>Notes</th><th>Actions</th>
+              </tr></thead>
+              <tbody><tr><td colspan="14" style="color:#98a2b3;padding:14px 12px;font-size:12px;">Loading&#8230;</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <!-- ══════════════ VIEW: DATA VIEWER ══════════════ -->
     <section class="view" id="view-data" style="flex-direction:column;overflow:hidden;">
       <div class="sheet-tabs" id="sheet-tabs-bar">
@@ -735,9 +975,9 @@
           <div class="section-card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
             <div>
               <div style="font-size:13px;font-weight:600;color:#1d2939;margin-bottom:3px;">Initialize / Repair Configuration Tabs</div>
-              <div style="font-size:12px;color:#667085;">Creates all eight configuration tabs (System Config, GL Config, RDC Aliases, Email Template, Header Config, Carrier Config, Output Routing, Rule Config) if missing or incomplete.</div>
+              <div style="font-size:12px;color:#667085;">Creates all configuration tabs (System Config, GL Config, RDC Aliases, Email Template, Header Config, Carrier Config, Output Routing, Rule Config, GL Code Templates, Addl Cost Config, Email Ingest Config) plus the Invoice Register and Automation Log if missing or incomplete.</div>
             </div>
-            <button id="btn-init-config" class="btn btn-success" style="min-width:200px;"><i class="fa-solid fa-play"></i> Run Initialization</button>
+            <button id="btn-init-config" data-action="init" class="btn btn-success" style="min-width:200px;"><i class="fa-solid fa-play"></i> Run Initialization</button>
           </div>
           <div id="init-status" style="display:none;margin:0 16px 14px;font-size:12px;padding:8px 10px;border-radius:4px;"></div>
         </div>
@@ -811,7 +1051,7 @@ var _currentFinalization = null;
 var _glCodeTemplates = [];
 
 // ── VIEW ROUTER ──────────────────────────────────────────
-var viewTitles = { dashboard: 'Dashboard', operations: 'Operations', processing: 'Processing', finalization: 'Invoice Finalization', results: 'Invoice Results', data: 'Data Viewer', config: 'Configuration' };
+var viewTitles = { dashboard: 'Dashboard', automation: 'Automation', register: 'Invoice Register', operations: 'Operations', processing: 'Processing', finalization: 'Invoice Finalization', results: 'Invoice Results', data: 'Data Viewer', config: 'Configuration' };
 
 function switchView(id) {
   if (_activeView === id) return;
@@ -823,7 +1063,9 @@ function switchView(id) {
   if (n) n.classList.add('active');
   document.getElementById('topbar-view-title').textContent = viewTitles[id] || id;
   _activeView = id;
-  if (id === 'results') loadInvoiceResults();
+  if (id === 'results') loadInvoiceResults(false);
+  if (id === 'automation') loadAutomation(false);
+  if (id === 'register') loadRegister(false);
 }
 
 document.querySelectorAll('.nav-item[data-view]').forEach(function(el) {
@@ -875,6 +1117,8 @@ function renderAll(d) {
   renderSheetTabs(d.viewerSheets || []);
   populateCarrierSelect(d.carriers || []);
   seedConsole(d.consoleSeed || []);
+  renderAutomationChip(d.automation || {});
+  renderRegisterKpis(d.register || {});
   if (d.workbook && d.workbook.openUrl) {
     document.getElementById('wb-link').href = d.workbook.openUrl;
     document.getElementById('wb-link').textContent = (d.workbook.name || 'Open Workbook') + ' \u2197';
@@ -952,7 +1196,7 @@ function renderReadiness(s) {
     arc.setAttribute('stroke-dashoffset', (157 - (score / 100) * 157).toFixed(1));
     arc.setAttribute('stroke', score >= 80 ? '#12b76a' : score >= 50 ? '#f79009' : '#f04438');
   }
-  document.getElementById('rd-config').textContent    = (s.configReadyCount || 0) + ' / 8';
+  document.getElementById('rd-config').textContent    = (s.configReadyCount || 0) + ' / ' + (s.configTabTotal || 11);
   var carrierDen = (s.enabledCarrierCount !== undefined) ? s.enabledCarrierCount : (s.primaryCarrierCount || 3);
   document.getElementById('rd-carriers').textContent  = (s.configuredCarrierCount || 0) + ' / ' + carrierDen;
   document.getElementById('rd-haulier').textContent   = (s.linkedHaulierCount || 0) + ' linked';
@@ -1070,100 +1314,106 @@ function seedConsole(seed) {
 }
 
 // ── PROCESSING ENGINE ─────────────────────────────────────
-document.getElementById('btn-run').addEventListener('click', function() {
-  var btn = document.getElementById('btn-run');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Extracting&hellip;';
-  document.getElementById('engine-progress-wrap').style.display = 'block';
-  logMsg('Dispatching invoice extraction engine&hellip;', 'warning');
+function runExtract() {
+  var btns = byAction('run');
+  setBusy(btns, true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Extracting&hellip;');
+  setEngineBusy(true);
+  logMsg('Dispatching invoice extraction engine…', 'warning');
   switchView('processing');
   google.script.run
     .withSuccessHandler(function(res) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-arrow-down-to-bracket"></i> Extract & Load Invoices';
-      document.getElementById('engine-progress-wrap').style.display = 'none';
-      var type = /^ERROR/i.test(res) ? 'error' : /^WARNING/i.test(res) ? 'warning' : 'success';
-      logMsg(res, type);
-      showEngineLastRun(res);
+      setBusy(btns, false); setEngineBusy(false);
+      var type = resultType(res);
+      logMsg(res, type); toast(res, type); showEngineLastRun(res);
+      _invoiceResultsLoadedAt = 0; _registerLoadedAt = 0; _automation = null;
       init();
-      switchView('finalization');
+      if (/^SUCCESS/i.test(res)) switchView('finalization');
     })
     .withFailureHandler(function(e) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-arrow-down-to-bracket"></i> Extract & Load Invoices';
-      document.getElementById('engine-progress-wrap').style.display = 'none';
-      logMsg('Engine failure: ' + e.message, 'error');
+      setBusy(btns, false); setEngineBusy(false);
+      logMsg('Engine failure: ' + e.message, 'error'); toast('Engine failure: ' + e.message, 'error');
     })
     .runProcessorExtractOnlyWeb();
-});
+}
 
-document.getElementById('btn-clear').addEventListener('click', function() {
-  if (!confirm('Archive and clear all active tracking data (Master Input, TMST, Additional Costs, Discrepancy Tracker)?')) return;
-  var btn = document.getElementById('btn-clear');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Archiving&hellip;';
-  logMsg('Archiving and clearing tracker data&hellip;', 'warning');
+function runCycleFromBar() {
+  var btns = byAction('cycle');
+  setBusy(btns, true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Running cycle&hellip;');
+  setEngineBusy(true);
+  logMsg('Running a full automation cycle (inbox scan + processing + replies)…', 'warning');
+  switchView('processing');
   google.script.run
     .withSuccessHandler(function(res) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker';
-      logMsg(res, 'success');
+      setBusy(btns, false); setEngineBusy(false);
+      var type = resultType(res);
+      logMsg(res, type); toast(res, type); showEngineLastRun(res);
+      _invoiceResultsLoadedAt = 0; _registerLoadedAt = 0; _automation = null;
       init();
-      loadInvoiceResults();
+      if (/^SUCCESS/i.test(res)) switchView('register');
     })
     .withFailureHandler(function(e) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-box-archive"></i> Archive &amp; Clear Tracker';
-      logMsg('Clear failed: ' + e.message, 'error');
+      setBusy(btns, false); setEngineBusy(false);
+      logMsg('Cycle failure: ' + e.message, 'error'); toast('Cycle failure: ' + e.message, 'error');
     })
+    .runAutomationCycleWeb();
+}
+
+function runClear() {
+  if (!confirm('Archive and clear all active tracking data (Master Input, TMST, Additional Costs, Discrepancy Tracker, Estimate Variance)? The Invoice Register is kept.')) return;
+  var btns = byAction('clear');
+  setBusy(btns, true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Archiving&hellip;');
+  logMsg('Archiving and clearing tracker data…', 'warning');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      setBusy(btns, false);
+      logMsg(res, 'success'); toast(res, 'success');
+      _invoiceResultsLoadedAt = 0;
+      init();
+      if (_activeView === 'results') loadInvoiceResults(true);
+    })
+    .withFailureHandler(function(e) { setBusy(btns, false); logMsg('Clear failed: ' + e.message, 'error'); toast('Clear failed: ' + e.message, 'error'); })
     .clearTrackerWeb();
-});
+}
+
+byAction('run').forEach(function(b) { b.addEventListener('click', runExtract); });
+byAction('cycle').forEach(function(b) { b.addEventListener('click', runCycleFromBar); });
+byAction('clear').forEach(function(b) { b.addEventListener('click', runClear); });
+byAction('init').forEach(function(b) { b.addEventListener('click', runInit); });
 
 if (document.getElementById('btn-finalize-invoices')) {
   document.getElementById('btn-finalize-invoices').addEventListener('click', function() {
     var btn = document.getElementById('btn-finalize-invoices');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Finalizing&hellip;';
-    logMsg('Finalizing pending invoices and generating PDFs&hellip;', 'warning');
+    setBusy([btn], true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Finalizing&hellip;');
+    logMsg('Finalizing pending invoices and generating PDFs…', 'warning');
     google.script.run
       .withSuccessHandler(function(res) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Finalize Pending Invoices';
-        var type = /^ERROR/i.test(res) ? 'error' : /^WARNING/i.test(res) ? 'warning' : 'success';
-        logMsg(res, type);
-        showEngineLastRun(res);
+        setBusy([btn], false);
+        var type = resultType(res);
+        logMsg(res, type); toast(res, type); showEngineLastRun(res);
+        _registerLoadedAt = 0;
         init();
       })
-      .withFailureHandler(function(e) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Finalize Pending Invoices';
-        logMsg('Finalization failure: ' + e.message, 'error');
-      })
+      .withFailureHandler(function(e) { setBusy([btn], false); logMsg('Finalization failure: ' + e.message, 'error'); toast('Finalization failure: ' + e.message, 'error'); })
       .finalizePendingInvoicesWeb();
   });
 }
 
-document.getElementById('btn-init').addEventListener('click', runInit);
-document.getElementById('btn-init-config').addEventListener('click', runInit);
 document.getElementById('btn-validate-config').addEventListener('click', runValidateConfig);
 
 function runInit() {
-  var btns = [document.getElementById('btn-init'), document.getElementById('btn-init-config')];
-  btns.forEach(function(b) { if (b) { b.disabled = true; b.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Initializing&hellip;'; } });
-  logMsg('Running configuration initialization&hellip;', 'info');
+  var btns = byAction('init');
+  setBusy(btns, true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Initializing&hellip;');
+  logMsg('Running configuration initialization…', 'info');
   google.script.run
     .withSuccessHandler(function(res) {
-      btns.forEach(function(b) { if (b) b.disabled = false; });
-      if (document.getElementById('btn-init'))        document.getElementById('btn-init').innerHTML        = '<i class="fa-solid fa-wand-magic-sparkles"></i> Initialize / Repair Config';
-      if (document.getElementById('btn-init-config')) document.getElementById('btn-init-config').innerHTML = '<i class="fa-solid fa-play"></i> Run Initialization';
+      setBusy(btns, false);
       logMsg(res.message, res.success ? 'success' : 'warning');
+      toast(res.message, res.success ? 'success' : 'warning');
       showInitStatus(res.message, res.success ? 'success' : 'warning');
+      _automation = null;
       init();
     })
-    .withFailureHandler(function(e) {
-      btns.forEach(function(b) { if (b) b.disabled = false; });
-      logMsg('Initialization failed: ' + e.message, 'error');
-    })
+    .withFailureHandler(function(e) { setBusy(btns, false); logMsg('Initialization failed: ' + e.message, 'error'); toast('Initialization failed: ' + e.message, 'error'); })
     .setupConfigWeb();
 }
 
@@ -1221,8 +1471,12 @@ function renderValidationResults(res) {
 }
 
 function showEngineLastRun(msg) {
-  document.getElementById('engine-last-run').style.display = 'block';
-  document.getElementById('engine-last-msg').textContent = new Date().toLocaleTimeString() + ' &mdash; ' + msg.replace(/^(SUCCESS|WARNING|ERROR):\s*/i, '');
+  var text = new Date().toLocaleTimeString() + ' — ' + String(msg || '').replace(/^(SUCCESS|WARNING|ERROR|SKIPPED):\s*/i, '');
+  document.querySelectorAll('.engine-last-run').forEach(function(el) {
+    el.style.display = 'block';
+    var span = el.querySelector('.engine-last-msg');
+    if (span) span.textContent = text;
+  });
 }
 
 function showInitStatus(msg, type) {
@@ -1312,7 +1566,8 @@ function renderConfigEditor(data) {
     { id: 'carrier',  label: 'Carrier Config',    icon: 'fa-route'         },
     { id: 'routing',  label: 'Output Routing',    icon: 'fa-share-nodes'   },
     { id: 'rules',    label: 'Rule Config',       icon: 'fa-list-check'    },
-    { id: 'addlcost', label: 'Addl Cost Config',  icon: 'fa-table-list'    }
+    { id: 'addlcost', label: 'Addl Cost Config',  icon: 'fa-table-list'    },
+    { id: 'ingest',   label: 'Email Ingest',      icon: 'fa-envelope-open-text' }
   ];
 
   var tabBar = tabs.map(function(t, i) {
@@ -1330,6 +1585,7 @@ function renderConfigEditor(data) {
   panels += '<div class="cfg-panel" id="cfg-panel-routing">'         + buildOutputRoutingPanel(data.outputRouting) + '</div>';
   panels += '<div class="cfg-panel" id="cfg-panel-rules">'           + buildRuleConfigPanel(data.ruleConfig, data.ruleCatalog || []) + '</div>';
   panels += '<div class="cfg-panel" id="cfg-panel-addlcost">'        + buildAddlCostConfigPanel(data.addlCostConfig) + '</div>';
+  panels += '<div class="cfg-panel" id="cfg-panel-ingest">'          + buildEmailIngestPanel(data.emailIngestConfig) + '</div>';
 
   document.getElementById('cfg-editor-body').innerHTML =
     '<div class="cfg-tab-bar">' + tabBar + '</div>' + panels;
@@ -2023,6 +2279,32 @@ function saveCfgPanel(tableId, sheetName, numCols) {
     .saveConfigData(sheetName, rows);
 }
 
+// ── EMAIL INGEST PANEL ────────────────────────────────────
+function buildEmailIngestPanel(rows) {
+  if (!rows) return missingTabAlert('Email Ingest Config');
+  var html = '<p class="cfg-note">Maps incoming emails to carriers for hands-free ingestion. <strong>Sender Match</strong> takes addresses or domains (comma separated). '
+    + 'Keywords are optional fallbacks matched against the subject / attachment names. <strong>Reply-To Override</strong> receives discrepancy notices for invoices that did not arrive by email. '
+    + 'The same table is editable from the <strong>Automation</strong> view.</p>';
+  html += '<div style="overflow-x:auto;"><table class="cfg-edit-table" id="tbl-ingestcfg">'
+    + '<thead><tr><th>Carrier</th><th>Sender Match</th><th>Subject Keywords</th><th>Attachment Keywords</th><th>Reply-To Override</th><th>Enabled</th><th style="width:28px;"></th></tr></thead><tbody>';
+  (rows || []).forEach(function(row) {
+    var enabledVal = String(row[5] || 'YES').trim().toUpperCase();
+    html += '<tr>'
+      + '<td><input class="cfg-input mono" data-col="0" value="' + escAttr(row[0] || '') + '" style="text-transform:uppercase;"></td>'
+      + '<td><input class="cfg-input mono" data-col="1" value="' + escAttr(row[1] || '') + '"></td>'
+      + '<td><input class="cfg-input" data-col="2" value="' + escAttr(row[2] || '') + '"></td>'
+      + '<td><input class="cfg-input" data-col="3" value="' + escAttr(row[3] || '') + '"></td>'
+      + '<td><input class="cfg-input mono" data-col="4" value="' + escAttr(row[4] || '') + '"></td>'
+      + '<td><select class="cfg-select" data-col="5"><option value="YES"' + (enabledVal !== 'NO' ? ' selected' : '') + '>YES</option><option value="NO"' + (enabledVal === 'NO' ? ' selected' : '') + '>NO</option></select></td>'
+      + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += cfgSaveBar('ingestcfg', 'Email Ingest Config', 6,
+    '<button class="btn btn-secondary" onclick="addCfgRow(\'ingestcfg\', 6)"><i class="fa-solid fa-plus"></i> Add Carrier</button>');
+  return html;
+}
+
 // ── OUTPUT ROUTING PANEL ──────────────────────────────────
 function buildOutputRoutingPanel(rows) {
   if (!rows) return missingTabAlert('Output Routing');
@@ -2071,8 +2353,9 @@ function addRoutingRow() {
 var _invoiceResults = [];
 var _invoiceResultsFiltered = [];
 var _invoiceResultsTab = 'summary';
+var _invoiceResultsLoadedAt = 0;
 
-document.getElementById('btn-load-results').addEventListener('click', loadInvoiceResults);
+document.getElementById('btn-load-results').addEventListener('click', function() { loadInvoiceResults(true); });
 document.getElementById('btn-inv-tab-summary').addEventListener('click', function() { switchInvoiceResultsTab('summary'); });
 document.getElementById('btn-inv-tab-view').addEventListener('click', function() { switchInvoiceResultsTab('view'); });
 
@@ -2091,7 +2374,9 @@ function switchInvoiceResultsTab(tab) {
   renderInvoiceItemsTable(_invoiceResultsFiltered);
 }
 
-function loadInvoiceResults() {
+function loadInvoiceResults(force) {
+  // Results are cached for a minute; the engine buttons invalidate the cache after each run.
+  if (!force && _invoiceResultsLoadedAt && (Date.now() - _invoiceResultsLoadedAt) < 60000) return;
   var btn = document.getElementById('btn-load-results');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;';
@@ -2099,6 +2384,7 @@ function loadInvoiceResults() {
     .withSuccessHandler(function(data) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Refresh';
+      _invoiceResultsLoadedAt = Date.now();
       _invoiceResults = data || [];
       populateInvoiceFilters(_invoiceResults);
       filterInvoiceResults();
@@ -2246,7 +2532,8 @@ function renderInvoiceResults(results) {
     var html = '<div class="inv-result-card" style="margin-bottom:10px;">'
       + '<div class="inv-result-header" onclick="toggleInvResult(' + idx + ')">'
       + '<div>'
-      + '<div class="inv-result-carrier">' + esc(r.carrier) + ' <span style="font-weight:400;font-size:12px;color:#667085;">→</span> <span class="inv-result-rdc">' + esc(r.rdc) + '</span></div>'
+      + '<div class="inv-result-carrier">' + esc(r.carrier) + ' <span style="font-weight:400;font-size:12px;color:#667085;">→</span> <span class="inv-result-rdc">' + esc(r.rdc) + '</span>'
+      + (r.invoiceNumber ? ' <span style="font-weight:500;font-size:12px;color:#475467;font-family:monospace;margin-left:6px;">#' + esc(r.invoiceNumber) + '</span>' : '') + '</div>'
       + '<div style="margin-top:3px;">' + statusBadge + '</div>'
       + '</div>'
       + '<div class="inv-result-stats">'
@@ -2624,6 +2911,396 @@ if (document.getElementById('btn-cancel-finalization')) {
     document.getElementById('fin-status-msg').textContent = '';
     switchView('results');
   });
+}
+
+// ── TOASTS ────────────────────────────────────────────
+function toast(msg, type, ms) {
+  type = type || 'info';
+  var stack = document.getElementById('toast-stack');
+  if (!stack) { stack = document.createElement('div'); stack.id = 'toast-stack'; document.body.appendChild(stack); }
+  var icons = { info: 'fa-circle-info', success: 'fa-circle-check', warning: 'fa-triangle-exclamation', error: 'fa-circle-xmark' };
+  var el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = '<i class="fa-solid ' + (icons[type] || icons.info) + '"></i><div>' + esc(msg) + '</div>';
+  stack.appendChild(el);
+  setTimeout(function() { el.classList.add('hide'); setTimeout(function() { el.remove(); }, 350); }, ms || (type === 'error' ? 9000 : 5000));
+}
+
+function resultType(res) {
+  return /^ERROR/i.test(res) ? 'error' : /^(WARNING|SKIPPED)/i.test(res) ? 'warning' : 'success';
+}
+
+function setBusy(buttons, busy, busyHtml) {
+  buttons.forEach(function(b) {
+    if (!b) return;
+    if (busy) { b.dataset.idleHtml = b.dataset.idleHtml || b.innerHTML; b.disabled = true; b.innerHTML = busyHtml; }
+    else { b.disabled = false; if (b.dataset.idleHtml) b.innerHTML = b.dataset.idleHtml; }
+  });
+}
+
+function byAction(action) { return Array.prototype.slice.call(document.querySelectorAll('[data-action="' + action + '"]')); }
+
+function setEngineBusy(on) {
+  document.querySelectorAll('.engine-progress').forEach(function(el) { el.style.display = on ? 'block' : 'none'; });
+}
+
+// ── AUTOMATION VIEW ───────────────────────────────────
+var _automation = null;
+var _automationLoadedAt = 0;
+
+function renderAutomationChip(a) {
+  var chip = document.getElementById('topbar-automation');
+  if (!chip) return;
+  a = a || {};
+  chip.style.display = 'flex';
+  var on = a.triggerInstalled && a.enabled !== false;
+  chip.className = 'topbar-auto ' + (on ? 'on' : 'off');
+  var txt = on ? 'Automation ON' + (a.triggerMinutes ? ' · every ' + a.triggerMinutes + 'm' : '') : (a.triggerInstalled ? 'Automation PAUSED' : 'Automation OFF');
+  if (a.lastRunDisplay) txt += ' · last ' + a.lastRunDisplay;
+  chip.innerHTML = '<i class="fa-solid fa-robot"></i><span>' + esc(txt) + '</span>';
+}
+
+function loadAutomation(force) {
+  if (!force && _automation && (Date.now() - _automationLoadedAt) < 30000) { renderAutomation(_automation); return; }
+  var btn = document.getElementById('btn-auto-refresh');
+  setBusy([btn], true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;');
+  google.script.run
+    .withSuccessHandler(function(s) {
+      setBusy([btn], false);
+      _automation = s; _automationLoadedAt = Date.now();
+      renderAutomation(s);
+      renderAutomationChip(s);
+    })
+    .withFailureHandler(function(e) { setBusy([btn], false); toast('Automation status failed: ' + e.message, 'error'); logMsg('Automation status failed: ' + e.message, 'error'); })
+    .getAutomationStatus();
+}
+
+function renderAutomation(s) {
+  s = s || {};
+  var pill = document.getElementById('auto-enabled-pill');
+  var on = s.triggerInstalled && s.enabled;
+  pill.className = 'pill ' + (on ? 'pill-on' : 'pill-off');
+  pill.textContent = on ? 'Running on schedule' : s.triggerInstalled ? 'Paused (AUTO_PROCESS_ENABLED = NO)' : 'Not scheduled';
+
+  document.getElementById('auto-trigger').textContent = s.triggerInstalled ? 'Every ' + s.triggerMinutes + ' minute' + (s.triggerMinutes === 1 ? '' : 's') : 'Not installed';
+  document.getElementById('auto-last-run').textContent = s.lastRunDisplay || 'Never';
+  document.getElementById('auto-next-run').textContent = s.nextRunApprox || (s.triggerInstalled ? 'Pending first run' : '—');
+  document.getElementById('auto-mode').textContent = s.mode === 'REVIEW' ? 'Review (queue for finalization)' : 'Auto (stamp GL + PDF)';
+  document.getElementById('auto-send').textContent = s.autoSend ? 'Sent automatically' : 'Drafted in thread';
+  document.getElementById('auto-account').textContent = s.account || '—';
+
+  var sum = document.getElementById('auto-last-summary');
+  if (s.lastRun && !s.lastRun.error) {
+    var lr = s.lastRun;
+    sum.style.display = 'block';
+    sum.innerHTML = '<strong>Last cycle:</strong> ' + esc(lr.emailsFiles || 0) + ' attachment(s) from ' + esc(lr.emailsThreads || 0) + ' thread(s) · '
+      + esc(lr.processed || 0) + '/' + esc(lr.files || 0) + ' file(s) processed · coded ' + esc(lr.coded || 0) + ' · discrepancies ' + esc(lr.discrepancy || 0)
+      + ' · review ' + esc(lr.needsReview || 0) + ' · duplicates ' + esc(lr.duplicates || 0) + ' · emails sent/drafted ' + esc(lr.emailsSent || 0) + '/' + esc(lr.emailsDrafted || 0)
+      + (lr.remaining ? ' · <span style="color:#b54708;">' + esc(lr.remaining) + ' deferred to next cycle</span>' : '')
+      + ' · ' + esc(lr.durationSec || 0) + 's';
+  } else if (s.lastRun && s.lastRun.error) {
+    sum.style.display = 'block';
+    sum.innerHTML = '<strong style="color:#c01048;">Last cycle failed:</strong> ' + esc(s.lastRun.error);
+  } else {
+    sum.style.display = 'none';
+  }
+
+  renderAutomationSettings(s.settings || {}, s.settingDescriptions || {});
+  renderIngestRules(s.ingestRules || []);
+  renderAutomationLog(s.log || []);
+}
+
+var AUTO_SETTING_FIELDS = [
+  { key: 'AUTO_PROCESS_ENABLED', label: 'Automation enabled', type: 'yesno' },
+  { key: 'AUTO_POLL_MINUTES', label: 'Run every (minutes)', type: 'select', options: ['5', '10', '15', '30', '60', '120', '240'] },
+  { key: 'AUTO_FINALIZE_MODE', label: 'Coding mode', type: 'select', options: ['AUTO', 'REVIEW'] },
+  { key: 'AUTO_SEND_DISCREPANCY_EMAILS', label: 'Send discrepancy replies automatically', type: 'yesno' },
+  { key: 'DISCREPANCY_EMAIL_INCLUDE_WARNINGS', label: 'Include non-blocking warnings in replies', type: 'yesno', def: 'NO' },
+  { key: 'DISCREPANCY_EMAIL_REPLY_ALL', label: 'Reply to all recipients', type: 'yesno', def: 'NO' },
+  { key: 'DISCREPANCY_EMAIL_CC', label: 'CC on discrepancy emails', type: 'text' },
+  { key: 'DISCREPANCY_EMAIL_BCC', label: 'BCC on discrepancy emails', type: 'text' },
+  { key: 'WEEK_NUMBER_SCHEME', label: 'Week numbering', type: 'select', options: ['ISO', 'US_SUNDAY', 'US_MONDAY'] },
+  { key: 'FILENAME_WEEK_FORMAT', label: 'File name format', type: 'text' },
+  { key: 'SPLIT_MULTI_INVOICE_WORKBOOKS', label: 'Split multi-invoice workbooks', type: 'yesno' },
+  { key: 'GMAIL_SEARCH_QUERY', label: 'Gmail search query', type: 'text' },
+  { key: 'GMAIL_MAX_THREADS_PER_RUN', label: 'Max email threads per cycle', type: 'text' },
+  { key: 'GMAIL_PROCESSED_LABEL', label: 'Gmail label: processed', type: 'text' },
+  { key: 'GMAIL_REVIEW_LABEL', label: 'Gmail label: needs review', type: 'text' },
+  { key: 'AUTO_RUN_TIME_BUDGET_SEC', label: 'Time budget per cycle (seconds)', type: 'text' },
+  { key: 'UNKNOWN_RDC_FOLDER_NAME', label: 'Folder for unknown RDC files', type: 'text' },
+  { key: 'DUPLICATE_FOLDER_NAME', label: 'Folder for duplicate invoices', type: 'text' },
+  { key: 'AUTO_ARCHIVE_ON_MANUAL_RUN', label: 'Manual runs archive tracker first', type: 'yesno' }
+];
+
+function renderAutomationSettings(settings, descriptions) {
+  var html = AUTO_SETTING_FIELDS.map(function(f) {
+    var val = settings[f.key] !== undefined ? String(settings[f.key]) : '';
+    var input;
+    if (f.type === 'yesno') {
+      var isYes = !/^(NO|FALSE|0|OFF|DISABLED)$/i.test(val.trim() || f.def || 'YES');
+      input = '<select class="cfg-select" data-setting="' + f.key + '"><option value="YES"' + (isYes ? ' selected' : '') + '>YES</option><option value="NO"' + (!isYes ? ' selected' : '') + '>NO</option></select>';
+    } else if (f.type === 'select') {
+      var opts = f.options.slice();
+      if (val && opts.indexOf(val) === -1) opts.unshift(val);
+      input = '<select class="cfg-select" data-setting="' + f.key + '">' + opts.map(function(o) { return '<option value="' + escAttr(o) + '"' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>';
+    } else {
+      input = '<input class="cfg-input' + (/QUERY|FORMAT|LABEL/.test(f.key) ? ' mono' : '') + '" data-setting="' + f.key + '" value="' + escAttr(val) + '">';
+    }
+    return '<div class="settings-field"><label>' + esc(f.label) + '</label>' + input + '<div class="help">' + esc(descriptions[f.key] || '') + '</div></div>';
+  }).join('');
+  document.getElementById('auto-settings-form').innerHTML = html;
+}
+
+function saveAutomationSettings() {
+  var payload = {};
+  document.querySelectorAll('#auto-settings-form [data-setting]').forEach(function(el) { payload[el.dataset.setting] = el.value; });
+  var btn = document.getElementById('btn-auto-save-settings');
+  var status = document.getElementById('auto-settings-status');
+  setBusy([btn], true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving&hellip;');
+  status.textContent = '';
+  google.script.run
+    .withSuccessHandler(function(res) {
+      setBusy([btn], false);
+      status.textContent = (res.success ? '✓ ' : '✗ ') + res.message;
+      status.style.color = res.success ? '#027a48' : '#c01048';
+      toast(res.message, res.success ? 'success' : 'error');
+      if (res.success) { _automation = null; loadAutomation(true); init(); }
+    })
+    .withFailureHandler(function(e) { setBusy([btn], false); status.textContent = '✗ ' + e.message; status.style.color = '#c01048'; toast(e.message, 'error'); })
+    .saveAutomationSettings(payload);
+}
+
+function ingestRowHtml(r) {
+  r = r || {};
+  var enabled = r.enabled === undefined ? true : !!r.enabled;
+  return '<tr>'
+    + '<td><input class="cfg-input mono" data-col="0" value="' + escAttr(r.carrier || '') + '" placeholder="HB" style="text-transform:uppercase;min-width:70px;"></td>'
+    + '<td><input class="cfg-input mono" data-col="1" value="' + escAttr((r.senders || []).join(', ')) + '" placeholder="billing@carrier.com, carrier.com" style="min-width:200px;"></td>'
+    + '<td><input class="cfg-input" data-col="2" value="' + escAttr((r.subjectKeywords || []).join(', ')) + '" placeholder="optional"></td>'
+    + '<td><input class="cfg-input" data-col="3" value="' + escAttr((r.attachmentKeywords || []).join(', ')) + '" placeholder="optional"></td>'
+    + '<td><input class="cfg-input mono" data-col="4" value="' + escAttr(r.replyTo || '') + '" placeholder="optional"></td>'
+    + '<td><select class="cfg-select" data-col="5"><option value="YES"' + (enabled ? ' selected' : '') + '>YES</option><option value="NO"' + (!enabled ? ' selected' : '') + '>NO</option></select></td>'
+    + '<td><button class="cfg-del-btn" onclick="delCfgRow(this)" title="Delete row"><i class="fa-solid fa-xmark"></i></button></td>'
+    + '</tr>';
+}
+
+function renderIngestRules(rules) {
+  var tbody = document.querySelector('#tbl-ingest tbody');
+  if (!rules.length) { tbody.innerHTML = ingestRowHtml({}); return; }
+  tbody.innerHTML = rules.map(ingestRowHtml).join('');
+}
+
+function addIngestRow() {
+  var tbody = document.querySelector('#tbl-ingest tbody');
+  var tr = document.createElement('tr');
+  tr.innerHTML = ingestRowHtml({}).replace(/^<tr>|<\/tr>$/g, '');
+  tbody.appendChild(tr);
+}
+
+function saveIngestRules() {
+  var rows = [];
+  document.querySelectorAll('#tbl-ingest tbody tr').forEach(function(tr) {
+    var row = [];
+    for (var c = 0; c < 6; c++) { var inp = tr.querySelector('[data-col="' + c + '"]'); row.push(inp ? inp.value : ''); }
+    if (String(row[0] || '').trim()) rows.push(row);
+  });
+  var btn = document.getElementById('btn-auto-save-ingest');
+  var status = document.getElementById('auto-ingest-status');
+  setBusy([btn], true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving&hellip;');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      setBusy([btn], false);
+      status.textContent = (res.success ? '✓ ' : '✗ ') + res.message;
+      status.style.color = res.success ? '#027a48' : '#c01048';
+      toast(res.message, res.success ? 'success' : 'error');
+      if (res.success) _automation = null;
+    })
+    .withFailureHandler(function(e) { setBusy([btn], false); status.textContent = '✗ ' + e.message; toast(e.message, 'error'); })
+    .saveEmailIngestConfigWeb(rows);
+}
+
+function renderAutomationLog(log) {
+  var tbody = document.querySelector('#auto-log-table tbody');
+  document.getElementById('auto-log-count').textContent = log.length + ' entr' + (log.length === 1 ? 'y' : 'ies');
+  if (!log.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No activity yet. Run a cycle or install the schedule.</td></tr>'; return; }
+  tbody.innerHTML = log.map(function(e) {
+    return '<tr><td>' + esc(e.timestamp) + '</td><td class="log-level-' + esc(e.level) + '">' + esc(String(e.level).toUpperCase()) + '</td><td>' + esc(e.event) + '</td><td style="white-space:normal;">' + esc(e.detail) + '</td></tr>';
+  }).join('');
+}
+
+function runAutomationAction(btnId, serverFn, busyLabel, startMsg) {
+  var btn = document.getElementById(btnId);
+  setBusy([btn], true, '<i class="fa-solid fa-circle-notch fa-spin"></i> ' + busyLabel);
+  setEngineBusy(true);
+  logMsg(startMsg, 'warning');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      setBusy([btn], false); setEngineBusy(false);
+      var msg = (res && res.message) ? res.message : String(res);
+      var type = (res && res.success === false) ? 'error' : resultType(msg);
+      logMsg(msg, type); toast(msg, type); showEngineLastRun(msg);
+      _automation = null; loadAutomation(true); init();
+      _registerLoadedAt = 0; if (_activeView === 'register') loadRegister(true);
+      _invoiceResultsLoadedAt = 0;
+    })
+    .withFailureHandler(function(e) {
+      setBusy([btn], false); setEngineBusy(false);
+      logMsg(busyLabel + ' failed: ' + e.message, 'error'); toast(e.message, 'error');
+    })[serverFn]();
+}
+
+document.getElementById('btn-auto-refresh').addEventListener('click', function() { loadAutomation(true); });
+document.getElementById('btn-auto-run').addEventListener('click', function() { runAutomationAction('btn-auto-run', 'runAutomationCycleWeb', 'Running cycle&hellip;', 'Running a full automation cycle (inbox scan + processing)…'); });
+document.getElementById('btn-auto-scan').addEventListener('click', function() { runAutomationAction('btn-auto-scan', 'ingestEmailsOnlyWeb', 'Scanning&hellip;', 'Scanning the inbox for carrier invoices…'); });
+document.getElementById('btn-auto-install').addEventListener('click', function() { runAutomationAction('btn-auto-install', 'installAutomationTriggersWeb', 'Installing&hellip;', 'Installing the automation schedule…'); });
+document.getElementById('btn-auto-remove').addEventListener('click', function() {
+  if (!confirm('Remove the scheduled automation trigger? Emails will no longer be processed automatically.')) return;
+  runAutomationAction('btn-auto-remove', 'removeAutomationTriggersWeb', 'Removing&hellip;', 'Removing the automation schedule…');
+});
+document.getElementById('btn-auto-save-settings').addEventListener('click', saveAutomationSettings);
+document.getElementById('btn-auto-save-ingest').addEventListener('click', saveIngestRules);
+
+// ── INVOICE REGISTER VIEW ─────────────────────────────
+var _register = null;
+var _registerLoadedAt = 0;
+
+function loadRegister(force) {
+  if (!force && _register && (Date.now() - _registerLoadedAt) < 30000) { renderRegister(); return; }
+  var btn = document.getElementById('btn-reg-refresh');
+  setBusy([btn], true, '<i class="fa-solid fa-circle-notch fa-spin"></i> Loading&hellip;');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      setBusy([btn], false);
+      _register = res || { rows: [], summary: {} };
+      _registerLoadedAt = Date.now();
+      populateRegisterFilters(_register.rows);
+      renderRegister();
+    })
+    .withFailureHandler(function(e) {
+      setBusy([btn], false);
+      document.querySelector('#register-table tbody').innerHTML = '<tr><td colspan="14" style="color:#c01048;padding:14px 12px;">' + esc(e.message) + '</td></tr>';
+      toast('Register failed to load: ' + e.message, 'error');
+    })
+    .getInvoiceRegister({ limit: 500 });
+}
+
+function populateRegisterFilters(rows) {
+  function fill(id, values, label) {
+    var sel = document.getElementById(id);
+    var current = sel.value;
+    var uniq = {};
+    values.forEach(function(v) { if (v) uniq[v] = true; });
+    var keys = Object.keys(uniq).sort();
+    if (id === 'reg-filter-week') keys.reverse();
+    sel.innerHTML = '<option value="">' + label + '</option>' + keys.map(function(k) { return '<option value="' + escAttr(k) + '">' + esc(k) + '</option>'; }).join('');
+    if (keys.indexOf(current) !== -1) sel.value = current;
+  }
+  fill('reg-filter-carrier', rows.map(function(r) { return r.carrier; }), 'All Carriers');
+  fill('reg-filter-rdc', rows.map(function(r) { return r.rdc; }), 'All RDCs');
+  fill('reg-filter-week', rows.map(function(r) { return r.week; }), 'All Weeks');
+}
+
+function statusPill(status) {
+  var s = String(status || '').toUpperCase();
+  var labels = { CODED: 'Coded', DISCREPANCY: 'Discrepancy', PENDING_REVIEW: 'Pending review', NEEDS_REVIEW: 'Needs review', ERROR: 'Error', DUPLICATE: 'Duplicate', SKIPPED: 'Skipped', RESOLVED: 'Resolved' };
+  return '<span class="pill pill-' + esc(s.toLowerCase()) + '">' + esc(labels[s] || s || '—') + '</span>';
+}
+
+function renderRegister() {
+  var reg = _register || { rows: [], summary: {} };
+  var sum = reg.summary || {};
+  document.getElementById('reg-total').textContent = fmt(sum.total);
+  document.getElementById('reg-this-week').textContent = fmt(sum.thisWeek);
+  document.getElementById('reg-coded').textContent = fmt(sum.coded);
+  document.getElementById('reg-awaiting').textContent = fmt(sum.awaitingReply);
+  document.getElementById('reg-review').textContent = fmt(sum.needsReview);
+
+  var fc = document.getElementById('reg-filter-carrier').value;
+  var fr = document.getElementById('reg-filter-rdc').value;
+  var fw = document.getElementById('reg-filter-week').value;
+  var fs = document.getElementById('reg-filter-status').value;
+  var q = document.getElementById('reg-search').value.trim().toLowerCase();
+  var rows = (reg.rows || []).filter(function(r) {
+    if (fc && r.carrier !== fc) return false;
+    if (fr && r.rdc !== fr) return false;
+    if (fw && r.week !== fw) return false;
+    if (fs && r.status !== fs) return false;
+    if (q) {
+      var hay = [r.invoiceNumber, r.fileName, r.emailFrom, r.emailSubject, r.notes, r.carrier, r.rdc].join(' ').toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  document.getElementById('reg-count-badge').textContent = rows.length + ' invoice' + (rows.length === 1 ? '' : 's');
+  var tbody = document.querySelector('#register-table tbody');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="14" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No invoices match the current filters.</td></tr>'; return; }
+  tbody.innerHTML = rows.map(function(r) {
+    var fileCell = r.fileUrl ? '<a class="reg-link" href="' + escAttr(r.fileUrl) + '" target="_blank" title="' + escAttr(r.fileName) + '">' + esc(r.fileName.length > 42 ? r.fileName.slice(0, 40) + '…' : r.fileName) + '</a>' : esc(r.fileName);
+    if (r.pdfUrl) fileCell += ' <a class="reg-link" href="' + escAttr(r.pdfUrl) + '" target="_blank" title="Coded PDF"><i class="fa-solid fa-file-pdf" style="color:#c01048;"></i></a>';
+    var emailCell = r.threadUrl
+      ? '<a class="reg-link" href="' + escAttr(r.threadUrl) + '" target="_blank" title="' + escAttr(r.emailSubject) + '"><i class="fa-solid fa-envelope"></i> ' + esc(r.emailFrom.replace(/<.*$/, '').trim() || 'Open thread') + '</a><div style="font-size:10px;color:#98a2b3;">' + esc(r.emailDate) + '</div>'
+      : '<span style="color:#98a2b3;">' + esc(r.source || '—') + '</span>';
+    var discCell = r.discEmail ? '<span style="font-weight:600;color:' + (/^SENT/.test(r.discEmail) ? '#027a48' : /^FAILED/.test(r.discEmail) ? '#c01048' : '#b54708') + ';">' + esc(r.discEmail) + '</span>' + (r.discEmailAt ? '<div style="font-size:10px;color:#98a2b3;">' + esc(r.discEmailAt) + '</div>' : '') : '<span style="color:#98a2b3;">—</span>';
+    var actions = '';
+    if (r.status === 'DISCREPANCY' || r.discrepancies > 0) actions += '<button class="btn btn-secondary btn-xs" title="Send / draft the discrepancy notice again" onclick="resendDiscrepancy(' + r.rowNumber + ')"><i class="fa-solid fa-paper-plane"></i></button>';
+    if (r.status !== 'RESOLVED' && r.status !== 'CODED') actions += '<button class="btn btn-secondary btn-xs" title="Mark as resolved" onclick="updateRegisterStatus(' + r.rowNumber + ', \'RESOLVED\')"><i class="fa-solid fa-check"></i></button>';
+    return '<tr>'
+      + '<td style="color:#667085;">' + esc(r.registeredAt) + '</td>'
+      + '<td style="font-weight:700;">' + esc(r.carrier) + '</td>'
+      + '<td>' + esc(r.rdc) + '</td>'
+      + '<td style="font-family:monospace;">' + esc(r.week) + '</td>'
+      + '<td style="font-family:monospace;font-weight:600;">' + esc(r.invoiceNumber) + '</td>'
+      + '<td class="wrap">' + fileCell + '</td>'
+      + '<td class="num">' + (r.totalAmount ? '$' + Number(r.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—') + '</td>'
+      + '<td class="num">' + esc(r.tuCount) + '</td>'
+      + '<td class="num" style="' + (r.discrepancies ? 'color:#c01048;font-weight:700;' : '') + '">' + esc(r.discrepancies) + '</td>'
+      + '<td>' + statusPill(r.status) + '</td>'
+      + '<td class="wrap">' + emailCell + '</td>'
+      + '<td class="wrap">' + discCell + '</td>'
+      + '<td class="wrap" style="color:#667085;font-size:10px;">' + esc(r.notes) + '</td>'
+      + '<td><div class="reg-actions">' + actions + '</div></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function resendDiscrepancy(rowNumber) {
+  if (!confirm('Send / draft the discrepancy notice for this invoice again?')) return;
+  toast('Sending discrepancy notice…', 'info', 2500);
+  google.script.run
+    .withSuccessHandler(function(res) { toast(res.message, res.success ? 'success' : 'error'); logMsg(res.message, res.success ? 'success' : 'error'); if (res.success) loadRegister(true); })
+    .withFailureHandler(function(e) { toast(e.message, 'error'); })
+    .resendDiscrepancyEmailWeb(rowNumber);
+}
+
+function updateRegisterStatus(rowNumber, status) {
+  google.script.run
+    .withSuccessHandler(function(res) { toast(res.message, res.success ? 'success' : 'error'); if (res.success) loadRegister(true); })
+    .withFailureHandler(function(e) { toast(e.message, 'error'); })
+    .updateRegisterRowWeb(rowNumber, { status: status, discEmail: status === 'RESOLVED' ? 'RESOLVED' : undefined });
+}
+
+['reg-filter-carrier', 'reg-filter-rdc', 'reg-filter-week', 'reg-filter-status'].forEach(function(id) { document.getElementById(id).addEventListener('change', renderRegister); });
+document.getElementById('reg-search').addEventListener('input', renderRegister);
+document.getElementById('btn-reg-refresh').addEventListener('click', function() { loadRegister(true); });
+
+// ── DASHBOARD: REGISTER KPIs + RECENT INVOICES ────────
+function renderRegisterKpis(reg) {
+  reg = reg || {};
+  document.getElementById('kpi-reg-total').textContent = fmt(reg.total);
+  document.getElementById('kpi-reg-week').textContent = fmt(reg.thisWeek);
+  document.getElementById('kpi-reg-awaiting').textContent = fmt(reg.awaitingReply);
+  document.getElementById('kpi-reg-review').textContent = fmt(reg.needsReview);
+  var badge = document.getElementById('nav-register-count');
+  var open = (reg.awaitingReply || 0) + (reg.needsReview || 0);
+  if (badge) { badge.style.display = open ? 'inline-block' : 'none'; badge.textContent = open; }
+  var tbody = document.querySelector('#recent-invoices-table tbody');
+  var recent = reg.recent || [];
+  if (!recent.length) { tbody.innerHTML = '<tr><td colspan="8" style="color:#98a2b3;padding:14px 12px;font-size:12px;">No invoices registered yet. Run a cycle or drop an invoice into a carrier folder.</td></tr>'; return; }
+  tbody.innerHTML = recent.map(function(r) {
+    var file = r.fileUrl ? '<a class="reg-link" href="' + escAttr(r.fileUrl) + '" target="_blank">' + esc(r.fileName.length > 36 ? r.fileName.slice(0, 34) + '…' : r.fileName) + '</a>' : esc(r.fileName);
+    return '<tr><td style="color:#667085;">' + esc(r.registeredAt) + '</td><td style="font-weight:700;">' + esc(r.carrier) + '</td><td>' + esc(r.rdc) + '</td><td style="font-family:monospace;">' + esc(r.week) + '</td>'
+      + '<td style="font-family:monospace;">' + esc(r.invoiceNumber) + '</td><td>' + file + '</td><td style="text-align:right;">' + (r.totalAmount ? '$' + Number(r.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '—') + '</td><td>' + statusPill(r.status) + '</td></tr>';
+  }).join('');
 }
 
 // ── BOOT ───────────────────────────────────────────────

@@ -22,6 +22,10 @@ function onOpen() {
     .addSeparator()
     .addItem('2. Process All Invoices', 'runMainProcess')
     .addItem('3. Clear Tracker Data', 'clearTrackerData')
+    .addSeparator()
+    .addItem('4. Run Automation Cycle Now', 'autoProcessCycle')
+    .addItem('5. Install Automation Trigger', 'installAutomationTriggers')
+    .addItem('6. Remove Automation Trigger', 'removeAutomationTriggers')
     .addToUi();
 }
 
@@ -260,8 +264,12 @@ function setupConfigTab(isWebApp) {
     addlCostCfgSheet.setColumnWidth(5, 220); addlCostCfgSheet.setColumnWidth(6, 80);
   }
 
+  // 11. Automation: Invoice Register, Automation Log, Email Ingest Config + automation settings
+  ensureAutomationSchema_(ss);
+  invalidateConfigCache_();
+
   if (!isWebApp) {
-    SpreadsheetApp.getUi().alert('Configuration setup complete. Please review the 10 Configuration tabs at the bottom of your sheet.');
+    SpreadsheetApp.getUi().alert('Configuration setup complete. Please review the 11 Configuration tabs at the bottom of your sheet.');
   }
 }
 
@@ -450,14 +458,27 @@ function ensureRuleConfigSchema_(ruleSheet) {
 
 // --- DATA FETCHERS ---
 
+var _configCache = null;
+
+function invalidateConfigCache_() {
+  _configCache = null;
+}
+
 function getConfig() {
+  // Cached for the lifetime of one execution: the engine, validators and dashboard used to
+  // re-read the System Config tab several times per call.
+  if (_configCache) return Object.assign({}, _configCache);
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const configSheet = ss.getSheetByName('System Config');
   if (!configSheet) throw new Error('System Config tab not found. Please run Initialization first.');
   const data = configSheet.getDataRange().getValues();
   const config = {};
-  for (let i = 1; i < data.length; i++) config[data[i][0]] = data[i][1];
-  return config;
+  for (let i = 1; i < data.length; i++) {
+    const key = String(data[i][0] || '').trim();
+    if (key) config[key] = data[i][1];
+  }
+  _configCache = config;
+  return Object.assign({}, config);
 }
 
 function getGlConfig() {
@@ -773,13 +794,8 @@ var _extractOnlyMode = false;
 var _pendingInvoices = [];
 
 function runMainProcessExtractOnly(isWebApp = false) {
-  _extractOnlyMode = true;
   _pendingInvoices = [];
-  try {
-    return runMainProcess(isWebApp);
-  } finally {
-    _extractOnlyMode = false;
-  }
+  return runMainProcess(isWebApp, { extractOnly: true });
 }
 
 function finalizePendingInvoices(isWebApp = false) {
@@ -845,13 +861,15 @@ function finalizePendingInvoices(isWebApp = false) {
         const invoiceSS = SpreadsheetApp.openById(sheetId);
         const targetFolder = folderId ? DriveApp.getFolderById(folderId) : DriveApp.getRootFolder();
 
+        let pdfFile = null;
         if (glMap && Object.keys(glMap).length > 0) {
-          applyManualGLCodesAndExportPDF(invoiceSS, fileName, glMap, targetFolder);
+          pdfFile = applyManualGLCodesAndExportPDF(invoiceSS, fileName, glMap, targetFolder);
         } else {
-          applyGLCodesAndExportPDF(invoiceSS, fileName, rdcName, costSummary, glConfig, targetFolder, tmstData);
+          pdfFile = applyGLCodesAndExportPDF(invoiceSS, fileName, rdcName, costSummary, glConfig, targetFolder, tmstData);
         }
 
         finSheet.getRange(item.rowNum, idxStatus + 1).setValue('FINALIZED');
+        updateRegisterByFileName_(fileName, { status: 'CODED', pdfUrl: pdfFile ? pdfFile.getUrl() : '' });
         processedCount++;
       } catch (e) {
         Logger.log(`[ERROR] Failed to finalize row ${item.rowNum}: ${e.message}`);
@@ -869,18 +887,31 @@ function finalizePendingInvoices(isWebApp = false) {
   }
 }
 
-function runMainProcess(isWebApp = false) {
+function runMainProcess(isWebApp = false, options) {
+  options = options || {};
+  const isAutoRun = options.mode === 'auto';
   let ui = null;
   if (!isWebApp) {
     ui = SpreadsheetApp.getUi();
   }
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const previousExtractMode = _extractOnlyMode;
+  if (options.extractOnly !== undefined) _extractOnlyMode = !!options.extractOnly;
+  let ownsContext = false;
 
   try {
     if (ui) ui.alert(_extractOnlyMode ? 'Extraction started. Please wait...' : 'Processing Started. This may take a few minutes. Please wait...');
     Logger.log(_extractOnlyMode ? '--- STARTING INVOICE EXTRACTION ---' : '--- STARTING INVOICE PROCESSING ---');
 
+    invalidateConfigCache_();
     const config = getConfig();
+    if (!_runCtx || !options.keepContext) {
+      beginRunContext_({ mode: isAutoRun ? 'auto' : 'manual', config: config });
+      ownsContext = true;
+    }
+    const ctx = _runCtx;
+    ensureAutomationSchema_(ss);
+
     const glConfig = getGlConfig();
     const rdcAliases = getRdcAliases();
     const emailTemplate = getEmailTemplate();
@@ -889,22 +920,6 @@ function runMainProcess(isWebApp = false) {
     _runtimeRuleConfig = getRuleConfig();
     _runtimeSystemConfig = config || {};
     _estimateDebugLogCount = 0;
-
-    Logger.log('Fetching Haulier Data...');
-    const haulierData = {
-      'FRG': fetchHaulierData(config.FRG_HAULIER_ID, headerAliases, 'FRG'),
-      'GRM': fetchHaulierData(config.GRM_HAULIER_ID, headerAliases, 'GRM'),
-      'PYE': fetchHaulierData(config.PYE_HAULIER_ID, headerAliases, 'PYE')
-    };
-
-    const masterData = [];
-    const additionalCostsData = [];
-    const discrepancyData = [];
-    const tmstData = [];
-    const estimateVarianceData = [];
-    const haulierUpdates = { 'FRG': [], 'GRM': [], 'PYE': [] };
-    const addlCostWritebackConfig = getAddlCostWritebackConfig_();
-    const addlCostWritebacks = {}; // keyed by RDC, array of { carrierName, weekEndDate, buckets }
 
     // Dynamically load ALL Carriers based on System Config (_ROOT_FOLDER suffix)
     const carriers = [];
@@ -915,58 +930,197 @@ function runMainProcess(isWebApp = false) {
       }
     }
 
+    // Pre-scan the root folders first. When there is nothing to do we return immediately
+    // without opening the (large) haulier workbooks — this keeps scheduled cycles cheap.
+    const workQueue = [];
     carriers.forEach(function(carrier) {
       if (!carrier.enabled) {
         Logger.log(`--- Skipping disabled carrier: ${carrier.name} ---`);
         return;
       }
-      Logger.log(`\n--- Processing Carrier: ${carrier.name} ---`);
       let rootFolder;
-      try { rootFolder = DriveApp.getFolderById(carrier.rootId); } catch (e) { return; }
+      try { rootFolder = DriveApp.getFolderById(carrier.rootId); }
+      catch (e) { Logger.log(`[WARNING] Root folder for ${carrier.name} is not accessible: ${e.message}`); return; }
+      const pending = listPendingInvoiceFiles_(rootFolder);
+      if (pending.length) workQueue.push({ carrier: carrier, rootFolder: rootFolder, files: pending });
+    });
+    ctx.stats.files = workQueue.reduce((n, item) => n + item.files.length, 0);
 
-      searchAndSortInvoices(rootFolder, carrier.name, haulierData, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, rdcAliases, emailTemplate, headerAliases, carrierConfig, config, haulierUpdates, addlCostWritebackConfig, addlCostWritebacks);
+    if (!workQueue.length) {
+      const idleMsg = 'WARNING: No new invoice files found in any carrier root folder.';
+      Logger.log(idleMsg);
+      if (ui) ui.alert(idleMsg);
+      return idleMsg;
+    }
+    Logger.log(`Found ${ctx.stats.files} file(s) to process across ${workQueue.length} carrier folder(s).`);
+
+    // Haulier workbooks are loaded lazily, only for the RDCs that actually have invoices.
+    const haulierData = createHaulierLoader_(config, headerAliases);
+
+    const masterData = [];
+    const additionalCostsData = [];
+    const discrepancyData = [];
+    const tmstData = [];
+    const estimateVarianceData = [];
+    const haulierUpdates = {};
+    const addlCostWritebackConfig = getAddlCostWritebackConfig_();
+    const addlCostWritebacks = {}; // keyed by RDC, array of { carrierName, weekEndDate, buckets }
+
+    workQueue.forEach(function(item) {
+      if (runBudgetExceeded_()) {
+        ctx.stats.remaining += item.files.length;
+        Logger.log(`--- Time budget reached. Deferring ${item.files.length} file(s) for ${item.carrier.name} to the next run ---`);
+        return;
+      }
+      Logger.log(`\n--- Processing Carrier: ${item.carrier.name} (${item.files.length} file(s)) ---`);
+      searchAndSortInvoices(item.rootFolder, item.carrier.name, haulierData, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, rdcAliases, emailTemplate, headerAliases, carrierConfig, config, haulierUpdates, addlCostWritebackConfig, addlCostWritebacks, item.files);
     });
 
     Logger.log('--- EXECUTING HAULIER REPORT WRITE-BACKS ---');
     for (let rdc in haulierUpdates) {
-      if (haulierUpdates[rdc].length > 0 && haulierData[rdc] && haulierData[rdc].spreadsheetId) {
-         applyUpdatesToHaulier(haulierData[rdc], haulierUpdates[rdc]);
+      const info = haulierData.loaded[rdc];
+      if (haulierUpdates[rdc].length > 0 && info && info.spreadsheetId) {
+         applyUpdatesToHaulier(info, haulierUpdates[rdc]);
       }
     }
 
     Logger.log('--- EXECUTING ADDITIONAL COST WRITE-BACKS ---');
     for (let rdc in addlCostWritebacks) {
-      if (addlCostWritebacks[rdc].length > 0 && haulierData[rdc] && haulierData[rdc].spreadsheetId) {
-        applyAddlCostWritebacks_(haulierData[rdc].spreadsheetId, rdc, addlCostWritebacks[rdc], addlCostWritebackConfig);
+      const info = haulierData.loaded[rdc];
+      if (addlCostWritebacks[rdc].length > 0 && info && info.spreadsheetId) {
+        applyAddlCostWritebacks_(info.spreadsheetId, rdc, addlCostWritebacks[rdc], addlCostWritebackConfig);
       }
     }
 
-    archiveAndClearSheets(ss);
+    // Manual runs keep the legacy "archive then load" behaviour unless disabled.
+    // Scheduled runs always append so earlier invoices from the same week stay visible.
+    const appendMode = options.appendMode === true || isAutoRun || !cfgYes_(config, 'AUTO_ARCHIVE_ON_MANUAL_RUN', true);
+    if (!appendMode) archiveAndClearSheets(ss);
 
     writeDataToSheet(ss, 'Master Input', masterData, 9);
-    writeDataToSheet(ss, 'TMST', tmstData, 15);
+    writeDataToSheet(ss, 'TMST', tmstData, 16);
     writeDataToSheet(ss, 'Additonal Costs', additionalCostsData, 5);
-    writeDataToSheet(ss, 'Discrepancy Tracker', discrepancyData, 6);
+    writeDataToSheet(ss, 'Discrepancy Tracker', discrepancyData, 8);
     writeDataToSheet(ss, 'Estimate Variance', estimateVarianceData, 11);
 
+    // Deliver discrepancy notices (reply-in-thread) and persist the Invoice Register rows.
+    const mail = flushDiscrepancyOutbox_(emailTemplate, config);
+    const registered = flushRegisterRows_();
+    const s = ctx.stats;
+    const remainingNote = s.remaining ? ` ${s.remaining} file(s) were deferred to the next run (time budget).` : '';
+    const mailNote = (mail.sent || mail.drafted) ? ` Discrepancy emails: ${mail.sent} sent, ${mail.drafted} drafted.` : '';
+    Logger.log(`Run summary: ${JSON.stringify(s)} | registered ${registered} invoice(s)`);
+
     if (masterData.length === 0 && additionalCostsData.length === 0) {
-      if (ui) ui.alert('Finished running, but no data was extracted. Files may have already been processed.');
-      return 'WARNING: Finished running, but no data was extracted. Files may have already been processed.';
+      const emptyMsg = `WARNING: ${s.files} file(s) inspected but no invoice data was extracted (needs review: ${s.needsReview}, duplicates: ${s.duplicates}, errors: ${s.errors}).${remainingNote}`;
+      if (ui) ui.alert(emptyMsg);
+      return emptyMsg;
     }
 
     if (_extractOnlyMode) {
-      const extractMsg = `SUCCESS: Extraction complete. ${_pendingInvoices.length} invoice(s) are ready for review/finalization.`;
+      const extractMsg = `SUCCESS: Extraction complete. ${s.pending} invoice(s) ready for review/finalization, ${s.discrepancy} with discrepancies, ${s.needsReview} need review, ${s.duplicates} duplicate(s).${mailNote}${remainingNote}`;
       if (ui) ui.alert(extractMsg);
       return extractMsg;
     }
 
-    if (ui) ui.alert('Processing Complete! Data added, GL Codes applied (if valid), drafts created for discrepancies, and files sorted.');
-    return 'SUCCESS: Processing Complete! Data added, GL Codes applied, drafts created, and files sorted.';
+    const doneMsg = `SUCCESS: Processing complete. ${s.coded} invoice(s) coded, ${s.discrepancy} with discrepancies, ${s.needsReview} need review, ${s.duplicates} duplicate(s), ${s.errors} error(s).${mailNote}${remainingNote}`;
+    if (ui) ui.alert(doneMsg);
+    return doneMsg;
   } catch (error) {
     Logger.log(`CRITICAL ERROR: ${error.message}`);
+    // Files may already have been moved: keep whatever was registered so nothing goes missing.
+    try { flushRegisterRows_(); } catch (e) {}
+    try { logAutomation_('Processing run failed', error.message, 'error'); } catch (e) {}
     if (ui) ui.alert('Error during processing: ' + error.message);
     return 'ERROR: ' + error.message;
+  } finally {
+    _extractOnlyMode = previousExtractMode;
+    if (ownsContext) endRunContext_();
   }
+}
+
+/**
+ * Lazily loads haulier workbooks. Only RDCs that actually receive an invoice in this run are
+ * opened, which removes three large spreadsheet reads from every idle cycle.
+ */
+function createHaulierLoader_(config, headerAliases) {
+  const loader = { loaded: {} };
+  loader.get = function(rdc) {
+    const key = String(rdc || '').trim().toUpperCase();
+    if (!key || key === 'UNKNOWN') return {};
+    if (!loader.loaded[key]) {
+      const id = String(config[key + '_HAULIER_ID'] || '').trim();
+      if (!id) {
+        Logger.log(`[WARNING] No ${key}_HAULIER_ID configured. Invoices for ${key} will not be reconciled against a haulier report.`);
+        loader.loaded[key] = { spreadsheetId: '', records: {}, recordGroups: {}, baseGroups: {} };
+      } else {
+        Logger.log(`Fetching Haulier Data for ${key}...`);
+        loader.loaded[key] = fetchHaulierData(id, headerAliases, key);
+      }
+    }
+    return loader.loaded[key];
+  };
+  return loader;
+}
+
+/**
+ * Lists the spreadsheet files (and shortcuts to spreadsheets) waiting in a carrier root folder.
+ * Temporary conversions and previously generated PDFs are ignored.
+ */
+function listPendingInvoiceFiles_(rootFolder) {
+  const items = [];
+  const files = rootFolder.getFiles();
+  while (files.hasNext()) {
+    const originalFile = files.next();
+    let file = originalFile;
+    let fileName = file.getName();
+    let mimeType = file.getMimeType();
+    if (mimeType === 'application/vnd.google-apps.shortcut') {
+      try {
+        file = DriveApp.getFileById(originalFile.getTargetId());
+        fileName = file.getName();
+        mimeType = file.getMimeType();
+      } catch (e) { continue; }
+    }
+    if (/^\[TEMP\]/i.test(fileName)) continue;
+    const isExcelOrSheet = /\.(xlsx|xlsm|xls|csv)$/i.test(fileName) ||
+      mimeType === MimeType.GOOGLE_SHEETS || mimeType === MimeType.MICROSOFT_EXCEL ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    if (!isExcelOrSheet) continue;
+    items.push({ originalFile: originalFile, file: file, fileName: fileName, mimeType: mimeType });
+  }
+  return items;
+}
+
+/**
+ * Content based RDC detection for files whose name carries no RDC hint. Only aliases of at least
+ * four characters are considered, with word boundaries, to avoid false positives such as "PER".
+ */
+function detectRdcFromContent_(invoiceSS, rdcAliases) {
+  try {
+    const sheets = invoiceSS.getSheets();
+    const texts = [];
+    for (let s = 0; s < Math.min(sheets.length, 3); s++) {
+      const maxRows = Math.min(sheets[s].getLastRow(), 40);
+      const maxCols = Math.min(sheets[s].getLastColumn(), 15);
+      if (maxRows < 1 || maxCols < 1) continue;
+      const values = sheets[s].getRange(1, 1, maxRows, maxCols).getDisplayValues();
+      values.forEach(row => texts.push(row.join(' ')));
+    }
+    const text = texts.join('\n').toUpperCase();
+    if (!text.trim() || !rdcAliases) return 'UNKNOWN';
+    for (let rdc in rdcAliases) {
+      for (let alias of rdcAliases[rdc]) {
+        const a = String(alias || '').trim();
+        if (a.length < 4) continue;
+        const re = new RegExp('(^|[^A-Z0-9])' + a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^A-Z0-9]|$)');
+        if (re.test(text)) return rdc;
+      }
+    }
+  } catch (e) {
+    Logger.log(`[WARNING] Content based RDC detection failed: ${e.message}`);
+  }
+  return 'UNKNOWN';
 }
 
 // --- ADDITIONAL COST WRITEBACK HELPERS ---
@@ -1295,16 +1449,27 @@ function applyUpdatesToHaulier(haulierInfo, updates) {
       }
     });
     
-    // Write the aggregated data back to the sheet
+    // Write the aggregated data back in two batched column writes instead of one API call
+    // per cell. Formulas in untouched cells of those columns are preserved.
+    const rowNumbers = Object.keys(rowUpdates).map(r => parseInt(r, 10)).filter(r => r > 0);
     let updateCount = 0;
-    for (let row in rowUpdates) {
-       const r = parseInt(row);
-       sheet.getRange(r, invCol + 1).setValue(rowUpdates[row].invoiceNumber);
-       // ONLY update amount if shift, store, and tour perfectly matched
-         if (rowUpdates[row].hasValidAmount && rowUpdates[row].amount !== null) {
-           sheet.getRange(r, amtCol + 1).setValue(rowUpdates[row].amount);
-       }
-       updateCount++;
+    if (rowNumbers.length) {
+      const minRow = Math.min.apply(null, rowNumbers);
+      const maxRow = Math.max.apply(null, rowNumbers);
+      const height = maxRow - minRow + 1;
+      const invRange = sheet.getRange(minRow, invCol + 1, height, 1);
+      const amtRange = sheet.getRange(minRow, amtCol + 1, height, 1);
+      const invOut = mergeColumnForWrite_(invRange);
+      const amtOut = mergeColumnForWrite_(amtRange);
+      rowNumbers.forEach(r => {
+        const i = r - minRow;
+        invOut[i][0] = rowUpdates[r].invoiceNumber;
+        // ONLY update amount if shift, store, and tour perfectly matched
+        if (rowUpdates[r].hasValidAmount && rowUpdates[r].amount !== null) amtOut[i][0] = rowUpdates[r].amount;
+        updateCount++;
+      });
+      invRange.setValues(invOut);
+      amtRange.setValues(amtOut);
     }
     
     Logger.log(`      -> Successfully wrote ${updateCount} aggregated records back to Haulier sheet: ${haulierInfo.sheetName}`);
@@ -1313,42 +1478,51 @@ function applyUpdatesToHaulier(haulierInfo, updates) {
   }
 }
 
+function mergeColumnForWrite_(range) {
+  const values = range.getValues();
+  const formulas = range.getFormulas();
+  return values.map((row, i) => [formulas[i][0] ? formulas[i][0] : row[0]]);
+}
+
 // --- FOLDER & FILE SEARCHING LOGIC ---
 
-function searchAndSortInvoices(rootFolder, carrierName, haulierData, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig, haulierUpdates, addlCostConfig, addlCostWritebacks) {
+function searchAndSortInvoices(rootFolder, carrierName, haulierData, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig, haulierUpdates, addlCostConfig, addlCostWritebacks, pendingFiles) {
+  const ctx = runContext_();
+  const files = pendingFiles || listPendingInvoiceFiles_(rootFolder);
   let count = 0;
-  const files = rootFolder.getFiles();
-  
-  while (files.hasNext()) {
-    count++;
-    let originalFile = files.next(); 
-    let file = originalFile; // Retain original item (e.g. the shortcut) for moving
-    let fileName = file.getName();
-    let mimeType = file.getMimeType();
-    
-    // If it's a shortcut, resolve it to read data, but keep 'originalFile' pointing to the shortcut!
-    if (mimeType === 'application/vnd.google-apps.shortcut') {
-      try {
-        file = DriveApp.getFileById(file.getTargetId());
-        fileName = file.getName();
-        mimeType = file.getMimeType();
-      } catch(e) { continue; }
-    }
-    
-    const isExcelOrSheet = fileName.toLowerCase().indexOf('.xlsx') > -1 || mimeType === MimeType.GOOGLE_SHEETS || mimeType === MimeType.MICROSOFT_EXCEL || mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-    if (isExcelOrSheet) {
-      let finalRdc = parseRDCName(fileName, rdcAliases);
-      
-      if (finalRdc === 'UNKNOWN') {
-        processInvoiceRouter(file, finalRdc, carrierName, {}, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, rootFolder, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig, haulierUpdates, addlCostConfig, addlCostWritebacks);
-      } else {
-         let targetFolder = getOrCreateFolder(rootFolder, finalRdc);
-        processInvoiceRouter(file, finalRdc, carrierName, haulierData[finalRdc] || {}, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, targetFolder, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig, haulierUpdates, addlCostConfig, addlCostWritebacks);
-         
-         // Move the ORIGINAL FILE (the shortcut we own), not the Target File (which we don't own).
-         try { moveFileToFolder(originalFile, targetFolder); } catch(e) { Logger.log("Failed to move file."); }
-      }
+  for (let i = 0; i < files.length; i++) {
+    if (runBudgetExceeded_()) {
+      ctx.stats.remaining += files.length - i;
+      Logger.log(`--- Time budget reached. ${files.length - i} file(s) for ${carrierName} deferred to the next run ---`);
+      break;
+    }
+    const item = files[i];
+    count++;
+    Logger.log(`\n  -> File ${i + 1}/${files.length}: ${item.fileName}`);
+    const emailMeta = getFileEmailMeta_(item.originalFile) || (item.originalFile.getId() !== item.file.getId() ? getFileEmailMeta_(item.file) : null);
+    const initialRdc = parseRDCName(item.fileName, rdcAliases);
+    const targetFolder = initialRdc !== 'UNKNOWN' ? getOrCreateFolder(rootFolder, initialRdc) : rootFolder;
+
+    let result = null;
+    try {
+      result = processInvoiceRouter(
+        item.file, initialRdc, carrierName, null,
+        masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData,
+        glConfig, targetFolder, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig,
+        haulierUpdates, addlCostConfig, addlCostWritebacks,
+        { originalFile: item.originalFile, emailMeta: emailMeta, rootFolder: rootFolder, haulierData: haulierData }
+      );
+    } catch (e) {
+      Logger.log(`[ERROR] Unhandled failure for ${item.fileName}: ${e.message}`);
+      ctx.stats.errors++;
+      result = { moveTo: getOrCreateFolder(rootFolder, 'Unprocessed Temporary') };
+    }
+
+    // Move the ORIGINAL item (the file or shortcut we own), never the shortcut target.
+    if (result && result.moveTo) {
+      try { moveFileToFolder(item.originalFile, result.moveTo); }
+      catch (e) { Logger.log(`[WARNING] Failed to move ${item.fileName}: ${e.message}`); }
     }
   }
   return count;
@@ -1387,205 +1561,366 @@ function moveFileToFolder(file, newParent) {
 
 // --- INVOICE PROCESSING ROUTER ---
 
-function processInvoiceRouter(file, rdcName, carrierName, haulierInfo, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, targetFolder, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig, haulierUpdates, addlCostConfig, addlCostWritebacks) {
+/**
+ * Prepares one Drive file for processing: converts Excel to a Google Sheet, detects the RDC,
+ * splits multi-invoice workbooks and hands every invoice to processInvoiceWorkbook_().
+ * Returns { rdc, status, moveTo } so the caller can file the original item away.
+ */
+function processInvoiceRouter(file, rdcName, carrierName, haulierInfo, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, glConfig, targetFolder, rdcAliases, emailTemplate, headerAliases, carrierConfig, systemConfig, haulierUpdates, addlCostConfig, addlCostWritebacks, opts) {
+  opts = opts || {};
+  const ctx = runContext_();
+  const config = systemConfig || {};
+  const rootFolder = opts.rootFolder || targetFolder;
+  const originalFile = opts.originalFile || file;
+  const emailMeta = opts.emailMeta || null;
+  const originalName = file.getName();
+  const fallbackInvoiceName = stripSpreadsheetExtension_(originalName);
+  const outcome = { rdc: rdcName, status: '', moveTo: null };
+
+  const reviewFolderName = String(config.UNKNOWN_RDC_FOLDER_NAME || 'Needs Review').trim() || 'Needs Review';
+  const duplicateFolderName = String(config.DUPLICATE_FOLDER_NAME || 'Duplicates').trim() || 'Duplicates';
+  const reviewFolder = () => getOrCreateFolder(rootFolder, reviewFolderName);
+  const unprocessedFolder = () => getOrCreateFolder(rdcName !== 'UNKNOWN' ? targetFolder : rootFolder, 'Unprocessed Temporary');
+
   let sheetId = file.getId();
   let isTemp = false;
-  let fileCostSummary = []; 
-  const initialDiscrepancyCount = discrepancyData.length; 
-  const initialTmstCount = tmstData.length;
-  
-  // Extract clean invoice name to act as the Invoice Number for writing back
-  const fallbackInvoiceName = file.getName().replace(/\.xlsx$/i, '');
-  
+  const tempIds = [];
+  const workFolder = rdcName !== 'UNKNOWN' ? targetFolder : reviewFolder();
+
   if (file.getMimeType() !== MimeType.GOOGLE_SHEETS) {
     try {
-      sheetId = convertExcelToGoogleSheet(file.getId(), targetFolder.getId());
+      sheetId = convertExcelToGoogleSheet(file.getId(), workFolder.getId());
       isTemp = true;
-    } catch(e) { return; }
+      tempIds.push(sheetId);
+    } catch (e) {
+      Logger.log(`[ERROR] Could not convert ${originalName} to a Google Sheet: ${e.message}`);
+      ctx.stats.errors++;
+      registerInvoice_({ carrier: carrierName, rdc: rdcName, invoiceNumber: fallbackInvoiceName, fileName: originalName, status: 'ERROR', emailMeta: emailMeta, fileUrl: safeFileUrl_(originalFile), notes: 'Conversion failed: ' + e.message });
+      flagEmailThreadForReview_(emailMeta);
+      outcome.status = 'ERROR';
+      outcome.moveTo = unprocessedFolder();
+      return outcome;
+    }
   }
-  
+
   try {
     const invoiceSS = SpreadsheetApp.openById(sheetId);
-    const invoiceCfg = getInvoiceExtractionConfig_(systemConfig, carrierConfig, carrierName);
-    const invoiceNumber = extractInvoiceNumber(invoiceSS, fallbackInvoiceName, invoiceCfg);
-    Logger.log(`      -> Extracted Invoice Number: '${invoiceNumber}'`);
-    
-    let isSchByStructure = false;
-    if (!carrierName.toUpperCase().includes('SCH')) {
-       for(let s=0; s<invoiceSS.getSheets().length; s++) {
-           let sheetNameLower = invoiceSS.getSheets()[s].getName().toLowerCase();
-           if(sheetNameLower.includes('order detail') || sheetNameLower.includes('customer detail') || sheetNameLower.includes('schneider')) {
-               isSchByStructure = true; carrierName = 'SCH'; break;
-           }
-       }
+    const invoiceCfg = getInvoiceExtractionConfig_(config, carrierConfig, carrierName);
+
+    // RDC fallback: look inside the workbook when the file name carries no hint.
+    if (rdcName === 'UNKNOWN') {
+      const detected = detectRdcFromContent_(invoiceSS, rdcAliases);
+      if (detected !== 'UNKNOWN') {
+        rdcName = detected;
+        targetFolder = getOrCreateFolder(rootFolder, rdcName);
+        Logger.log(`      -> RDC '${rdcName}' detected from the workbook contents.`);
+        if (isTemp) { try { moveFileToFolder(DriveApp.getFileById(sheetId), targetFolder); } catch (e) {} }
+      }
     }
 
-     let processorType = String((carrierConfig[carrierName.toUpperCase()] || {}).processorType || '').toUpperCase();
-     if (!processorType) {
-      if (carrierName.toUpperCase().includes('CRE')) processorType = 'CRE';
-      else if (carrierName.toUpperCase().includes('SCH') || isSchByStructure) processorType = 'SCH';
-      else processorType = 'HB';
-     }
-
-     if (processorType === 'CRE') {
-       processCreInvoice(invoiceSS, rdcName, carrierName, haulierInfo, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, fileCostSummary, headerAliases, glConfig, invoiceNumber, haulierUpdates);
-     } else if (processorType === 'SCH') {
-       processSchInvoice(invoiceSS, rdcName, carrierName, haulierInfo, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, fileCostSummary, headerAliases, glConfig, invoiceNumber, haulierUpdates);
-    } else {
-       // Default parser for HB and HB-style dynamic carriers.
-       processHbInvoice(invoiceSS, rdcName, carrierName, haulierInfo, masterData, additionalCostsData, tmstData, discrepancyData, estimateVarianceData, fileCostSummary, headerAliases, glConfig, invoiceNumber, haulierUpdates);
-    }
-
-    // For CRE invoices, parse the invoice week-ending date now (fileCostSummary is populated)
-    const invoiceWeekEndDate = (processorType === 'CRE') ? parseCreInvoiceWeekEnd_(invoiceSS) : null;
-
-    const fileDiscrepancies = discrepancyData.slice(initialDiscrepancyCount);
-    const fileTmstData = tmstData.slice(initialTmstCount);
-
-    Logger.log(`    -> Discrepancy Check for ${file.getName()}: Found ${fileDiscrepancies.length} issues.`);
-
-    // Amount Mismatch is informational only (used to verify estimation formulas).
-    // It must not block GL coding or PDF generation — only structural issues (TU not found,
-    // shift/store/tour mismatch) should prevent the invoice from being completed.
-    const nonBlockingIssues = {
-      'Amount Mismatch': true,
-      'Ignored Shift 2 vs Shift 1 (Config Enabled)': true,
-      'HB Blank Shift / Tour Mapping Mismatch': true
-    };
-    const blockingDiscrepancies = fileDiscrepancies.filter(d => !nonBlockingIssues[String(d[5] || '')]);
-    const hasOnlyNonBlockingWarnings = fileDiscrepancies.length > 0 && blockingDiscrepancies.length === 0;
-
-    if (blockingDiscrepancies.length > 0) {
-      Logger.log(`    -> DRAFTING DISCREPANCY EMAIL (Skipping GL PDF) for ${file.getName()}`);
-      fileDiscrepancies.forEach((d, i) => {
-         Logger.log(`       [Error ${i+1}] Date: ${d[1]}, TU: '${d[2]}', Issue: ${d[5]}`);
+    if (rdcName === 'UNKNOWN') {
+      const invoiceNumber = extractInvoiceNumber(invoiceSS, fallbackInvoiceName, invoiceCfg);
+      Logger.log(`      -> RDC could not be determined for ${originalName}. Filed under '${reviewFolderName}'.`);
+      ctx.stats.needsReview++;
+      registerInvoice_({
+        carrier: carrierName, rdc: 'UNKNOWN', invoiceNumber: invoiceNumber, fileName: originalName, status: 'NEEDS_REVIEW',
+        emailMeta: emailMeta, fileUrl: safeFileUrl_(originalFile),
+        notes: `RDC not found in the file name or contents. Rename the file with the RDC (e.g. "${originalName.replace(/(\.[^.]+)$/, ' FRG$1')}") and move it back to the ${carrierName} root folder.`
       });
-      createDiscrepancyEmailDraft(carrierName, file.getName(), fileDiscrepancies, emailTemplate);
-    } 
-    else if (rdcName !== 'UNKNOWN' && fileCostSummary.length > 0) {
-      if (_extractOnlyMode) {
-        const suggestedGl = buildSuggestedGLCodes_(invoiceSS, file.getName(), rdcName, fileCostSummary, glConfig, fileTmstData, false);
-        const suggestedCount = Object.keys(suggestedGl.glTotals || {}).length;
-        Logger.log(`    -> [EXTRACT MODE] Loaded ${file.getName()} for review/finalization. Cost items: ${fileCostSummary.length}.`);
-        if (suggestedCount > 0) {
-          Logger.log(`    -> [EXTRACT MODE] Preloaded ${suggestedCount} suggested GL code bucket(s) for manual review.`);
-        }
-        savePendingInvoiceGLCodes_(
-          file.getName(),
-          rdcName,
-          invoiceNumber || fallbackInvoiceName,
-          suggestedGl.grandTotal || sumFileCostSummary_(fileCostSummary),
-          suggestedGl.glTotals || {},
-          {
-            sheetId: sheetId,
-            targetFolderId: targetFolder.getId(),
-            costSummary: fileCostSummary,
-            tmstData: fileTmstData
-          }
-        );
-        _pendingInvoices.push({
-          fileName: file.getName(),
-          sheetId: sheetId,
-          rdcName: rdcName,
-          carrierName: carrierName,
-          costSummary: fileCostSummary,
-          tmstData: fileTmstData,
-          isTemp: isTemp
-        });
-        if (hasOnlyNonBlockingWarnings) {
-          createDiscrepancyEmailDraft(carrierName, file.getName(), fileDiscrepancies, emailTemplate);
-        }
-      } else {
-        Logger.log(`    -> Applying GL Codes & generating PDF for ${file.getName()}. Total cost items found: ${fileCostSummary.length}${hasOnlyNonBlockingWarnings ? ' (Non-blocking warnings present — coding proceeding)' : ''}`);
-        applyGLCodesAndExportPDF(invoiceSS, file.getName(), rdcName, fileCostSummary, glConfig, targetFolder, fileTmstData);
-        // If there were only non-blocking warnings, still draft a warning email so they can be reviewed.
-        if (hasOnlyNonBlockingWarnings) {
-          createDiscrepancyEmailDraft(carrierName, file.getName(), fileDiscrepancies, emailTemplate);
-        }
-      }
+      flagEmailThreadForReview_(emailMeta);
+      logAutomation_('Invoice needs review', `${carrierName} :: ${originalName} :: RDC unknown`, 'warning');
+      outcome.status = 'NEEDS_REVIEW';
+      outcome.moveTo = workFolder;
+      return outcome;
+    }
+    outcome.rdc = rdcName;
 
-      // Queue additional cost writeback for CRE invoices after successful processing
-      if (processorType === 'CRE' && invoiceWeekEndDate && addlCostConfig && addlCostWritebacks && rdcName !== 'UNKNOWN') {
-        const buckets = collectAddlCostBuckets_(fileCostSummary, carrierName, rdcName, addlCostConfig);
-        if (Object.keys(buckets).length > 0) {
-          if (!addlCostWritebacks[rdcName]) addlCostWritebacks[rdcName] = [];
-          addlCostWritebacks[rdcName].push({ carrierName: carrierName, weekEndDate: invoiceWeekEndDate, buckets: buckets });
-          Logger.log(`    -> [ADDL COST] Queued ${Object.keys(buckets).length} bucket(s) for ${rdcName}/CRE, week-end ${Utilities.formatDate(invoiceWeekEndDate, Session.getScriptTimeZone(), 'MM/dd/yyyy')}`);
+    if (opts.haulierData && typeof opts.haulierData.get === 'function') haulierInfo = opts.haulierData.get(rdcName);
+    haulierInfo = haulierInfo || {};
+    if (haulierUpdates && !haulierUpdates[rdcName] && haulierInfo.spreadsheetId) haulierUpdates[rdcName] = [];
+
+    // Some carriers bundle several invoices into one workbook. Split them so each invoice is
+    // registered, coded and queried on its own.
+    let parts = [];
+    if (cfgYes_(config, 'SPLIT_MULTI_INVOICE_WORKBOOKS', true)) {
+      const groups = detectInvoiceGroups_(invoiceSS, invoiceCfg);
+      if (groups.length >= 2) {
+        parts = splitMultiInvoiceWorkbook_(invoiceSS, groups, targetFolder, originalName);
+        if (parts.length) {
+          parts.forEach(p => tempIds.push(p.sheetId));
+          Logger.log(`      -> Workbook contains ${parts.length} invoices: ${parts.map(p => p.invoiceNumber).join(', ')}. Processing each separately.`);
+          logAutomation_('Multi-invoice workbook split', `${carrierName} :: ${originalName} -> ${parts.map(p => p.invoiceNumber).join(', ')}`, 'info');
         }
       }
-    } 
-    else {
-      Logger.log(`    -> SKIPPING GL PDF for ${file.getName()}: RDC is '${rdcName}' (Must not be UNKNOWN) AND Cost Summary length is ${fileCostSummary.length} (Must be > 0).`);
+    }
+    if (!parts.length) {
+      parts = [{ ss: invoiceSS, sheetId: sheetId, invoiceNumber: extractInvoiceNumber(invoiceSS, fallbackInvoiceName, invoiceCfg), isTemp: isTemp }];
     }
 
+    const shared = {
+      rdcName: rdcName, carrierName: carrierName, haulierInfo: haulierInfo,
+      masterData: masterData, additionalCostsData: additionalCostsData, tmstData: tmstData,
+      discrepancyData: discrepancyData, estimateVarianceData: estimateVarianceData,
+      glConfig: glConfig, targetFolder: targetFolder, emailTemplate: emailTemplate, headerAliases: headerAliases,
+      carrierConfig: carrierConfig, systemConfig: config, haulierUpdates: haulierUpdates,
+      addlCostConfig: addlCostConfig, addlCostWritebacks: addlCostWritebacks,
+      emailMeta: emailMeta, originalFile: originalFile, originalName: originalName, rootFolder: rootFolder
+    };
+
+    let firstWeek = null;
+    let duplicates = 0;
+    parts.forEach(function(part, idx) {
+      const partResult = processInvoiceWorkbook_(shared, part, idx, parts.length);
+      if (partResult && partResult.status === 'DUPLICATE') duplicates++;
+      if (partResult && partResult.week && !firstWeek) firstWeek = partResult.week;
+    });
+
+    if (duplicates === parts.length) {
+      outcome.status = 'DUPLICATE';
+      outcome.moveTo = getOrCreateFolder(rootFolder, duplicateFolderName);
+      return outcome;
+    }
+
+    if (firstWeek) {
+      renameOriginalFile_(originalFile, firstWeek, { carrier: carrierName, rdc: rdcName, invoiceNumber: parts.length === 1 ? parts[0].invoiceNumber : '' }, config);
+    }
+    outcome.status = 'OK';
+    outcome.moveTo = targetFolder;
   } catch (e) {
     Logger.log(`Error processing sheet: ${e.message}`);
-    
-    // Move unprocessable files to 'Unprocessed Temporary' folder
-    try {
-      const unprocessedFolder = getOrCreateFolder(targetFolder, 'Unprocessed Temporary');
-      moveFileToFolder(file, unprocessedFolder);
-      Logger.log(`    -> File moved to 'Unprocessed Temporary' folder due to processing error.`);
-    } catch (moveErr) {
-      Logger.log(`    -> Could not move file to Unprocessed folder: ${moveErr.message}`);
+    ctx.stats.errors++;
+    registerInvoice_({ carrier: carrierName, rdc: rdcName, invoiceNumber: fallbackInvoiceName, fileName: originalName, status: 'ERROR', emailMeta: emailMeta, fileUrl: safeFileUrl_(originalFile), notes: 'Processing error: ' + e.message });
+    flagEmailThreadForReview_(emailMeta);
+    logAutomation_('Invoice processing error', `${carrierName} :: ${originalName} :: ${e.message}`, 'error');
+    outcome.status = 'ERROR';
+    outcome.moveTo = unprocessedFolder();
+  } finally {
+    // Temporary conversions are kept in extract/review mode because finalization re-opens them.
+    if (!_extractOnlyMode) {
+      tempIds.forEach(id => { try { DriveApp.getFileById(id).setTrashed(true); } catch (e) { } });
     }
   }
-  
-  if (isTemp && !_extractOnlyMode) {
-    try { DriveApp.getFileById(sheetId).setTrashed(true); } catch(e) { }
+  return outcome;
+}
+
+/**
+ * Processes ONE invoice (a whole workbook, or one part of a split workbook): extraction,
+ * reconciliation, week numbering, GL coding / finalization queueing, discrepancy notices and
+ * the Invoice Register entry.
+ */
+function processInvoiceWorkbook_(s, part, partIndex, partCount) {
+  const ctx = runContext_();
+  const invoiceSS = part.ss;
+  const sheetId = part.sheetId;
+  const config = s.systemConfig || {};
+  const rdcName = s.rdcName;
+  let carrierName = s.carrierName;
+  const emailMeta = s.emailMeta;
+  const ext = (String(s.originalName || '').match(/\.(xlsx|xlsm|xls|csv)$/i) || [''])[0];
+  const invoiceNumber = String(part.invoiceNumber || stripSpreadsheetExtension_(s.originalName));
+  const displayBase = partCount > 1
+    ? `${stripSpreadsheetExtension_(s.originalName)} [${invoiceNumber}]`
+    : stripSpreadsheetExtension_(s.originalName);
+
+  Logger.log(`      -> Extracted Invoice Number: '${invoiceNumber}'${partCount > 1 ? ` (invoice ${partIndex + 1} of ${partCount})` : ''}`);
+
+  // Never process the same carrier invoice twice (re-sent emails, re-uploads).
+  const duplicate = isDuplicateInvoice_(carrierName, invoiceNumber);
+  if (duplicate) {
+    ctx.stats.duplicates++;
+    Logger.log(`      -> DUPLICATE: ${carrierName} invoice ${invoiceNumber} is already registered as '${duplicate.fileName}' (${duplicate.status}). Skipping.`);
+    registerInvoice_({
+      carrier: carrierName, rdc: rdcName, invoiceNumber: invoiceNumber, fileName: displayBase + ext, status: 'DUPLICATE',
+      emailMeta: emailMeta, fileUrl: safeFileUrl_(s.originalFile),
+      notes: `Already registered as "${duplicate.fileName}" (${duplicate.status}).`
+    });
+    logAutomation_('Duplicate invoice skipped', `${carrierName} :: ${invoiceNumber} :: ${displayBase}`, 'warning');
+    return { status: 'DUPLICATE', week: null };
+  }
+
+  const fileCostSummary = [];
+  const initialDiscrepancyCount = s.discrepancyData.length;
+  const initialTmstCount = s.tmstData.length;
+  const initialMasterCount = s.masterData.length;
+
+  let isSchByStructure = false;
+  if (!carrierName.toUpperCase().includes('SCH')) {
+    const sheets = invoiceSS.getSheets();
+    for (let i = 0; i < sheets.length; i++) {
+      const sheetNameLower = sheets[i].getName().toLowerCase();
+      if (sheetNameLower.includes('order detail') || sheetNameLower.includes('customer detail') || sheetNameLower.includes('schneider')) {
+        isSchByStructure = true; carrierName = 'SCH'; break;
+      }
+    }
+  }
+
+  let processorType = String((s.carrierConfig[carrierName.toUpperCase()] || {}).processorType || '').toUpperCase();
+  if (!processorType) {
+    if (carrierName.toUpperCase().includes('CRE')) processorType = 'CRE';
+    else if (carrierName.toUpperCase().includes('SCH') || isSchByStructure) processorType = 'SCH';
+    else processorType = 'HB';
+  }
+
+  if (processorType === 'CRE') {
+    processCreInvoice(invoiceSS, rdcName, carrierName, s.haulierInfo, s.masterData, s.additionalCostsData, s.tmstData, s.discrepancyData, s.estimateVarianceData, fileCostSummary, s.headerAliases, s.glConfig, invoiceNumber, s.haulierUpdates);
+  } else if (processorType === 'SCH') {
+    processSchInvoice(invoiceSS, rdcName, carrierName, s.haulierInfo, s.masterData, s.additionalCostsData, s.tmstData, s.discrepancyData, s.estimateVarianceData, fileCostSummary, s.headerAliases, s.glConfig, invoiceNumber, s.haulierUpdates);
+  } else {
+    // Default parser for HB and HB-style dynamic carriers.
+    processHbInvoice(invoiceSS, rdcName, carrierName, s.haulierInfo, s.masterData, s.additionalCostsData, s.tmstData, s.discrepancyData, s.estimateVarianceData, fileCostSummary, s.headerAliases, s.glConfig, invoiceNumber, s.haulierUpdates);
+  }
+
+  // For CRE invoices, parse the invoice week-ending date now (fileCostSummary is populated)
+  const invoiceWeekEndDate = (processorType === 'CRE') ? parseCreInvoiceWeekEnd_(invoiceSS) : null;
+
+  const fileDiscrepancies = s.discrepancyData.slice(initialDiscrepancyCount);
+  const fileTmstData = s.tmstData.slice(initialTmstCount);
+  const fileMasterRows = s.masterData.slice(initialMasterCount);
+
+  // Tag every row with the carrier and invoice number so the tracker sheets are per-invoice.
+  fileDiscrepancies.forEach(d => { d[6] = carrierName; d[7] = invoiceNumber; });
+  fileTmstData.forEach(r => { r[15] = invoiceNumber; });
+
+  // Week number: majority week of the line-item dates, then the carrier's stated period end,
+  // then the email date.
+  const week = computeInvoiceWeek_(fileMasterRows.map(r => r[1]), [invoiceWeekEndDate, emailMeta && emailMeta.date], config);
+  const naming = buildWeekFileName_(displayBase, week, { carrier: carrierName, rdc: rdcName, invoiceNumber: invoiceNumber }, config);
+  const displayName = naming.base;           // used for the coded PDF and the finalization queue
+  const displayFull = displayName + ext;     // stored in the Invoice Register
+  Logger.log(`      -> Invoice week: ${week.label} ${week.year} (from ${week.source}). Display name: ${displayFull}`);
+
+  Logger.log(`    -> Discrepancy Check for ${displayFull}: Found ${fileDiscrepancies.length} issues.`);
+
+  // Amount Mismatch is informational only (used to verify estimation formulas).
+  // It must not block GL coding or PDF generation — only structural issues (TU not found,
+  // shift/store/tour mismatch) should prevent the invoice from being completed.
+  const nonBlockingIssues = {
+    'Amount Mismatch': true,
+    'Ignored Shift 2 vs Shift 1 (Config Enabled)': true,
+    'HB Blank Shift / Tour Mapping Mismatch': true
+  };
+  const blockingDiscrepancies = fileDiscrepancies.filter(d => !nonBlockingIssues[String(d[5] || '')]);
+  const hasOnlyNonBlockingWarnings = fileDiscrepancies.length > 0 && blockingDiscrepancies.length === 0;
+  const includeWarnings = cfgYes_(config, 'DISCREPANCY_EMAIL_INCLUDE_WARNINGS', false);
+  const emailDiscrepancies = includeWarnings ? fileDiscrepancies : blockingDiscrepancies;
+
+  const invoiceTotal = findInvoiceTotal_(invoiceSS);
+  const totalAmount = (invoiceTotal !== null && invoiceTotal > 0) ? invoiceTotal : sumFileCostSummary_(fileCostSummary);
+
+  const entry = {
+    carrier: carrierName, rdc: rdcName, week: week, invoiceNumber: invoiceNumber, fileName: displayFull,
+    totalAmount: totalAmount, tuCount: fileTmstData.length, discrepancyCount: fileDiscrepancies.length,
+    emailMeta: emailMeta, fileUrl: safeFileUrl_(s.originalFile), pdfUrl: '', status: '', notes: '', discEmail: ''
+  };
+  const discItem = { carrier: carrierName, invoiceNumber: invoiceNumber, fileName: displayFull, rdc: rdcName, week: week, discrepancies: emailDiscrepancies, emailMeta: emailMeta };
+
+  if (blockingDiscrepancies.length > 0) {
+    Logger.log(`    -> QUEUING DISCREPANCY NOTICE (Skipping GL PDF) for ${displayFull}`);
+    fileDiscrepancies.forEach((d, i) => {
+      Logger.log(`       [Error ${i + 1}] Date: ${d[1]}, TU: '${d[2]}', Issue: ${d[5]}`);
+    });
+    queueDiscrepancyEmail_(discItem);
+    entry.status = 'DISCREPANCY';
+    entry.notes = summarizeIssues_(blockingDiscrepancies);
+    ctx.stats.discrepancy++;
+  }
+  else if (fileCostSummary.length > 0) {
+    if (_extractOnlyMode) {
+      const suggestedGl = buildSuggestedGLCodes_(invoiceSS, displayFull, rdcName, fileCostSummary, s.glConfig, fileTmstData, false);
+      const suggestedCount = Object.keys(suggestedGl.glTotals || {}).length;
+      Logger.log(`    -> [EXTRACT MODE] Loaded ${displayFull} for review/finalization. Cost items: ${fileCostSummary.length}.`);
+      if (suggestedCount > 0) {
+        Logger.log(`    -> [EXTRACT MODE] Preloaded ${suggestedCount} suggested GL code bucket(s) for manual review.`);
+      }
+      savePendingInvoiceGLCodes_(
+        displayFull,
+        rdcName,
+        invoiceNumber,
+        suggestedGl.grandTotal || sumFileCostSummary_(fileCostSummary),
+        suggestedGl.glTotals || {},
+        {
+          sheetId: sheetId,
+          targetFolderId: s.targetFolder.getId(),
+          costSummary: fileCostSummary,
+          tmstData: fileTmstData
+        }
+      );
+      _pendingInvoices.push({
+        fileName: displayFull,
+        sheetId: sheetId,
+        rdcName: rdcName,
+        carrierName: carrierName,
+        costSummary: fileCostSummary,
+        tmstData: fileTmstData,
+        isTemp: part.isTemp
+      });
+      entry.status = 'PENDING_REVIEW';
+      ctx.stats.pending++;
+      if (hasOnlyNonBlockingWarnings && includeWarnings) queueDiscrepancyEmail_(discItem);
+    } else {
+      Logger.log(`    -> Applying GL Codes & generating PDF for ${displayFull}. Total cost items found: ${fileCostSummary.length}${hasOnlyNonBlockingWarnings ? ' (Non-blocking warnings present — coding proceeding)' : ''}`);
+      const pdfFile = applyGLCodesAndExportPDF(invoiceSS, displayFull, rdcName, fileCostSummary, s.glConfig, s.targetFolder, fileTmstData);
+      entry.status = 'CODED';
+      entry.pdfUrl = pdfFile ? pdfFile.getUrl() : '';
+      ctx.stats.coded++;
+      if (hasOnlyNonBlockingWarnings && includeWarnings) queueDiscrepancyEmail_(discItem);
+    }
+    if (hasOnlyNonBlockingWarnings) entry.notes = 'Non-blocking warnings: ' + summarizeIssues_(fileDiscrepancies);
+
+    // Queue additional cost writeback for CRE invoices after successful processing
+    if (processorType === 'CRE' && invoiceWeekEndDate && s.addlCostConfig && s.addlCostWritebacks) {
+      const buckets = collectAddlCostBuckets_(fileCostSummary, carrierName, rdcName, s.addlCostConfig);
+      if (Object.keys(buckets).length > 0) {
+        if (!s.addlCostWritebacks[rdcName]) s.addlCostWritebacks[rdcName] = [];
+        s.addlCostWritebacks[rdcName].push({ carrierName: carrierName, weekEndDate: invoiceWeekEndDate, buckets: buckets });
+        Logger.log(`    -> [ADDL COST] Queued ${Object.keys(buckets).length} bucket(s) for ${rdcName}/CRE, week-end ${Utilities.formatDate(invoiceWeekEndDate, Session.getScriptTimeZone(), 'MM/dd/yyyy')}`);
+      }
+    }
+  }
+  else {
+    Logger.log(`    -> SKIPPING GL PDF for ${displayFull}: Cost Summary length is ${fileCostSummary.length} (Must be > 0).`);
+    entry.status = 'SKIPPED';
+    entry.notes = 'No cost line items were found on the invoice tab.';
+  }
+
+  ctx.stats.processed++;
+  registerInvoice_(entry);
+  return { status: entry.status, week: week };
+}
+
+function summarizeIssues_(discrepancies) {
+  const counts = {};
+  (discrepancies || []).forEach(d => { const k = String(d[5] || 'Issue'); counts[k] = (counts[k] || 0) + 1; });
+  return Object.keys(counts).sort((a, b) => counts[b] - counts[a]).slice(0, 4).map(k => `${k} ×${counts[k]}`).join('; ');
+}
+
+function safeFileUrl_(file) {
+  try { return file ? file.getUrl() : ''; } catch (e) { return ''; }
+}
+
+function renameOriginalFile_(originalFile, week, extras, config) {
+  try {
+    const current = originalFile.getName();
+    const naming = buildWeekFileName_(current, week, extras, config);
+    if (naming.renamed && naming.full !== current) {
+      originalFile.setName(naming.full);
+      Logger.log(`      -> Renamed '${current}' to '${naming.full}'.`);
+    }
+    return naming.full;
+  } catch (e) {
+    Logger.log(`[WARNING] Could not rename file: ${e.message}`);
+    return originalFile.getName();
   }
 }
 
 // --- EMAIL DRAFTING LOGIC ---
 
+/**
+ * Legacy entry point kept for compatibility. Discrepancy notices are now queued and delivered
+ * at the end of the run as a reply inside the carrier's own email thread (see automation.js).
+ */
 function createDiscrepancyEmailDraft(carrierName, fileName, discrepancies, emailTemplate) {
-  const subjTemplate = (emailTemplate && emailTemplate['Subject']) ? emailTemplate['Subject'] : `Discrepancy Notice: Invoice {FileName}`;
-  const greetTemplate = (emailTemplate && emailTemplate['Greeting']) ? emailTemplate['Greeting'] : `Hello {CarrierName} Team,\n\nThe following items are showing as discrepancies in our system. Please advise:`;
-  const outroTemplate = (emailTemplate && emailTemplate['Outro']) ? emailTemplate['Outro'] : `Thank you.`;
-
-  const subject = subjTemplate.replace(/{FileName}/g, fileName).replace(/{CarrierName}/g, carrierName);
-  const greetingText = greetTemplate.replace(/{CarrierName}/g, carrierName).replace(/\n/g, '<br>');
-  const outroText = outroTemplate.replace(/\n/g, '<br>');
-  
-  let plainBody = `${greetingText.replace(/<br>/g, '\n')}\n\n`;
-  
-  let htmlBody = `<div style="font-family: Arial, sans-serif; color: #333;">`;
-  htmlBody += `<p>${greetingText}</p>`;
-  htmlBody += `<table style="border-collapse: collapse; width: 100%; max-width: 800px; margin-top: 15px;">`;
-  htmlBody += `<thead>`;
-  htmlBody += `<tr style="background-color: #f2f2f2;">`;
-  htmlBody += `<th style="border: 1px solid #000; padding: 10px; text-align: left;">Date</th>`;
-  htmlBody += `<th style="border: 1px solid #000; padding: 10px; text-align: left;">TU</th>`;
-  htmlBody += `<th style="border: 1px solid #000; padding: 10px; text-align: left;">Issue</th>`;
-  htmlBody += `<th style="border: 1px solid #000; padding: 10px; text-align: left;">Billed Store/Tour</th>`;
-  htmlBody += `</tr>`;
-  htmlBody += `</thead>`;
-  htmlBody += `<tbody>`;
-
-  discrepancies.forEach(d => {
-    let dateStr = d[1];
-    if (dateStr instanceof Date) {
-      dateStr = Utilities.formatDate(dateStr, Session.getScriptTimeZone(), 'MM/dd/yyyy');
-    }
-    
-    plainBody += `• Date: ${dateStr} | TU: ${d[2]} | Issue: ${d[5]} (Billed: ${d[4]})\n`;
-    
-    htmlBody += `<tr>`;
-    htmlBody += `<td style="border: 1px solid #000; padding: 8px;">${dateStr}</td>`;
-    htmlBody += `<td style="border: 1px solid #000; padding: 8px;">${d[2]}</td>`;
-    htmlBody += `<td style="border: 1px solid #000; padding: 8px;">${d[5]}</td>`;
-    htmlBody += `<td style="border: 1px solid #000; padding: 8px;">${d[4]}</td>`;
-    htmlBody += `</tr>`;
-  });
-
-  plainBody += `\n${outroText.replace(/<br>/g, '\n')}`;
-  
-  htmlBody += `</tbody>`;
-  htmlBody += `</table>`;
-  htmlBody += `<p style="margin-top: 20px;">${outroText}</p>`;
-  htmlBody += `</div>`;
-
-  GmailApp.createDraft("", subject, plainBody, { htmlBody: htmlBody });
+  queueDiscrepancyEmail_({ carrier: carrierName, invoiceNumber: '', fileName: fileName, rdc: '', week: null, discrepancies: discrepancies, emailMeta: null });
 }
 
 // --- GL CODING & PDF EXPORT LOGIC ---
@@ -1752,7 +2087,7 @@ function applyGLCodesAndExportPDF(invoiceSS, originalFileName, rdcName, fileCost
   const suggestion = buildSuggestedGLCodes_(invoiceSS, originalFileName, rdcName, fileCostSummary, glConfig, fileTmstData, true);
   const glTotals = suggestion.glTotals || {};
   const grandTotal = Number(suggestion.grandTotal || 0);
-  if (!Object.keys(glTotals).length) return;
+  if (!Object.keys(glTotals).length) return null;
   
   let stampRows = [];
   stampRows.push(['GL CODING SUMMARY', 'GL ACCOUNT / COST CENTER']);
@@ -1793,8 +2128,8 @@ function applyGLCodesAndExportPDF(invoiceSS, originalFileName, rdcName, fileCost
   
   SpreadsheetApp.flush(); 
   
-  const pdfName = originalFileName.replace(/\.xlsx$/i, '') + ' - CODED.pdf';
-  exportSheetToPDF(invoiceSS.getId(), summarySheet.getSheetId(), pdfName, targetFolder);
+  const pdfName = stripSpreadsheetExtension_(originalFileName) + ' - CODED.pdf';
+  return exportSheetToPDF(invoiceSS.getId(), summarySheet.getSheetId(), pdfName, targetFolder);
 }
 
 function applyManualGLCodesAndExportPDF(invoiceSS, originalFileName, glCodeMap, targetFolder) {
@@ -1833,8 +2168,8 @@ function applyManualGLCodesAndExportPDF(invoiceSS, originalFileName, glCodeMap, 
 
   SpreadsheetApp.flush();
 
-  const pdfName = originalFileName.replace(/\.xlsx$/i, '') + ' - CODED.pdf';
-  exportSheetToPDF(invoiceSS.getId(), summarySheet.getSheetId(), pdfName, targetFolder);
+  const pdfName = stripSpreadsheetExtension_(originalFileName) + ' - CODED.pdf';
+  return exportSheetToPDF(invoiceSS.getId(), summarySheet.getSheetId(), pdfName, targetFolder);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2518,10 +2853,10 @@ function exportSheetToPDF(spreadsheetId, sheetId, pdfName, folder) {
   const response = UrlFetchApp.fetch(url, options);
   if (response.getResponseCode() === 200) {
     const blob = response.getBlob().setName(pdfName);
-    folder.createFile(blob);
-  } else {
-    Logger.log(`[ERROR] PDF Export failed: ${response.getContentText()}`);
+    return folder.createFile(blob);
   }
+  Logger.log(`[ERROR] PDF Export failed: ${response.getContentText()}`);
+  return null;
 }
 
 // --- UNIVERSAL TMST & DISCREPANCY LOGIC ---
@@ -3561,7 +3896,6 @@ function fetchHaulierData(spreadsheetId, headerAliases, rdcLogName = "Unknown RD
     info.sheetName = sheet.getName();
     const data = sheet.getDataRange().getValues();
     const displayData = sheet.getDataRange().getDisplayValues();
-    const formulaData = sheet.getDataRange().getFormulas();
     let tuIndex = -1, storeIndex = -1, typeIndex = -1, shiftIndex = -1, tourIndex = -1;
     let invCol = -1, amtCol = -1, estCol = -1;
     const headers = data[0];
@@ -3642,6 +3976,11 @@ function fetchHaulierData(spreadsheetId, headerAliases, rdcLogName = "Unknown RD
       `[ESTIMATE CONFIG] ${rdcLogName}: invoiceCol=${info.invoiceColIdx + 1}, amountCol=${info.amountColIdx + 1}, estimateCol=${info.estimateColIdx + 1} (${estimateHeaderName || 'n/a'})`
     );
     
+    // Formulas are only needed for the estimate column (diagnostics); avoid a third full read.
+    const estimateFormulas = (info.estimateColIdx >= 0 && data.length > 0)
+      ? sheet.getRange(1, info.estimateColIdx + 1, data.length, 1).getFormulas()
+      : null;
+
     let loadedCount = 0;
     let estimatePresentCount = 0;
     let estimateFormulaCount = 0;
@@ -3652,7 +3991,7 @@ function fetchHaulierData(spreadsheetId, headerAliases, rdcLogName = "Unknown RD
       const tu = cleanTuNumber(data[i][tuIndex]);
       const estimateRaw = info.estimateColIdx !== -1 ? data[i][info.estimateColIdx] : '';
       const estimateDisplay = info.estimateColIdx !== -1 ? displayData[i][info.estimateColIdx] : '';
-      const estimateFormula = info.estimateColIdx !== -1 ? formulaData[i][info.estimateColIdx] : '';
+      const estimateFormula = estimateFormulas ? estimateFormulas[i][0] : '';
       const hasEstimateFormula = !!String(estimateFormula || '').trim();
       const hasEstimateValue = parseCurrency_(estimateRaw) !== null || parseCurrency_(estimateDisplay) !== null;
       if (hasEstimateFormula) estimateFormulaCount++;
@@ -3724,29 +4063,30 @@ function convertExcelToGoogleSheet(excelFileId, parentFolderId) {
   }
 }
 
+var IMT_OPERATION_HEADERS = {
+  'Master Input': ['RDC', 'Date', 'Shift', 'TU', 'Store', 'Miles', 'NY Pay', 'Tolls', 'Total Cost'],
+  'TMST': ['RDC', 'Date', 'Shift', 'TU', 'Store', 'Miles', 'NY Pay', 'Tolls', 'Total Cost', 'Type', 'TU Match', 'Shift Match', 'Store Match', 'Tour Match', 'Carrier', 'Invoice Number'],
+  'Additonal Costs': ['RDC', 'Carrier', 'Description', 'Amount', 'Source File'],
+  'Discrepancy Tracker': ['RDC', 'Date', 'TU', 'Expected', 'Actual', 'Issue', 'Carrier', 'Invoice Number'],
+  'Estimate Variance': ['RDC', 'Date', 'TU', 'Carrier', 'Invoice Number', 'Expected Estimate', 'Actual Amount', 'Difference (Actual-Expected)', 'Alert Threshold', 'Abs Difference', 'Status']
+};
+
 function writeDataToSheet(ss, sheetName, dataArray, targetColumnCount) {
   let sheet = ss.getSheetByName(sheetName);
+  const known = IMT_OPERATION_HEADERS[sheetName] || [];
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
-    let headers = [];
-    if (sheetName === 'Estimate Variance') {
-      headers = [
-        'RDC',
-        'Date',
-        'TU',
-        'Carrier',
-        'Invoice Number',
-        'Expected Estimate',
-        'Actual Amount',
-        'Difference (Actual-Expected)',
-        'Alert Threshold',
-        'Abs Difference',
-        'Status'
-      ];
-    } else {
-      for(let i=1; i<=targetColumnCount; i++) headers.push("Column " + i);
-    }
+    const headers = [];
+    for (let i = 1; i <= targetColumnCount; i++) headers.push(known[i - 1] || ('Column ' + i));
     sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  } else if (sheet.getLastRow() >= 1 && sheet.getLastColumn() < targetColumnCount) {
+    // Schema grew (e.g. Carrier / Invoice Number columns): label the new header cells.
+    const startCol = sheet.getLastColumn() + 1;
+    const extra = [];
+    for (let c = startCol; c <= targetColumnCount; c++) extra.push(known[c - 1] || ('Column ' + c));
+    sheet.getRange(1, startCol, 1, extra.length).setValues([extra]).setFontWeight('bold');
   }
 
   if (dataArray.length === 0) return;
@@ -3907,7 +4247,8 @@ function getDashboardData() {
   });
 
   // --- Readiness metrics ---
-  const cfgTabs = ['System Config', 'GL Config', 'RDC Aliases', 'Email Template', 'Header Config', 'Carrier Config', 'Output Routing', 'Rule Config', 'GL Code Templates', 'Addl Cost Config'];
+  const cfgTabs = ['System Config', 'GL Config', 'RDC Aliases', 'Email Template', 'Header Config', 'Carrier Config', 'Output Routing', 'Rule Config', 'GL Code Templates', 'Addl Cost Config', IMT_EMAIL_INGEST_SHEET];
+  const configTabTotal         = cfgTabs.length;
   const configReadyCount       = cfgTabs.filter(n => !!ss.getSheetByName(n)).length;
   const enabledCarrierCount    = carriers.filter(c => c.enabled).length;
   const configuredCarrierCount = carriers.filter(c => c.enabled && c.rootFolderConfigured).length;
@@ -3921,14 +4262,14 @@ function getDashboardData() {
   const discRate      = masterRows > 0 ? Math.round((discrepancies / masterRows) * 100) : 0;
 
   let score = 0;
-  score += Math.round((configReadyCount / 10) * 40);
+  score += Math.round((configReadyCount / configTabTotal) * 40);
   score += Math.round((Math.min(configuredCarrierCount, 2) / 2) * 30);
   score += Math.round((Math.min(linkedHaulierCount, 2) / 2) * 30);
 
   // --- Alerts ---
   const alerts = [];
-  if (!configLoadOk || configReadyCount < 10) {
-    alerts.push({ severity: 'warning', title: 'Configuration Incomplete', detail: `${10 - configReadyCount} config tab(s) missing. Run Initialization.` });
+  if (!configLoadOk || configReadyCount < configTabTotal) {
+    alerts.push({ severity: 'warning', title: 'Configuration Incomplete', detail: `${configTabTotal - configReadyCount} config tab(s) missing. Run Initialization.` });
   }
   if (enabledCarrierCount === 0) {
     alerts.push({ severity: 'critical', title: 'No Carriers Enabled', detail: 'Set at least one *_ENABLED key to YES in System Config.' });
@@ -3942,6 +4283,38 @@ function getDashboardData() {
   }
   if (estimateVarianceRows > 0) {
     alerts.push({ severity: 'warning', title: 'Estimate Variance Alerts', detail: `${estimateVarianceRows} TU row(s) exceed estimate-vs-actual threshold.` });
+  }
+
+  // --- Automation + Invoice Register summary (single round-trip for the UI) ---
+  let automation = { triggerInstalled: false, enabled: true, mode: 'AUTO', autoSend: true, lastRunDisplay: '', lastRun: null, triggerMinutes: 0 };
+  try {
+    const triggers = getAutomationTriggers_();
+    const lastRun = getLastRun_();
+    automation = {
+      triggerInstalled: triggers.length > 0,
+      enabled: cfgYes_(config, 'AUTO_PROCESS_ENABLED', true),
+      mode: String(config.AUTO_FINALIZE_MODE || 'AUTO').toUpperCase(),
+      autoSend: cfgYes_(config, 'AUTO_SEND_DISCREPANCY_EMAILS', true),
+      triggerMinutes: parseInt(PropertiesService.getScriptProperties().getProperty(IMT_PROP_TRIGGER_MINUTES) || '0', 10) || 0,
+      lastRun: lastRun,
+      lastRunDisplay: lastRun && lastRun.at ? Utilities.formatDate(new Date(lastRun.at), Session.getScriptTimeZone(), 'MM/dd HH:mm') : ''
+    };
+  } catch (e) {}
+  let register = { total: 0, thisWeek: 0, awaitingReply: 0, needsReview: 0, coded: 0, pendingReview: 0, recent: [] };
+  try {
+    const reg = getInvoiceRegister({ limit: 300 });
+    register = Object.assign({}, reg.summary, { recent: reg.rows.slice(0, 8) });
+  } catch (e) {}
+  if (!automation.triggerInstalled) {
+    alerts.push({ severity: 'info', title: 'Automation Not Scheduled', detail: 'Install the automation trigger from the Automation view to process emails hands-free.' });
+  } else if (automation.lastRun && automation.lastRun.error) {
+    alerts.push({ severity: 'critical', title: 'Last Automation Cycle Failed', detail: automation.lastRun.error });
+  }
+  if (register.awaitingReply > 0) {
+    alerts.push({ severity: 'warning', title: 'Awaiting Carrier Replies', detail: `${register.awaitingReply} invoice(s) have open discrepancy notices.` });
+  }
+  if (register.needsReview > 0) {
+    alerts.push({ severity: 'warning', title: 'Invoices Need Review', detail: `${register.needsReview} invoice(s) could not be processed automatically. See the Invoice Register.` });
   }
 
   // --- Sheet summary helper ---
@@ -3962,7 +4335,9 @@ function getDashboardData() {
     sheetObj('TMST',                'TMST',                'TU reconciliation with haulier data'),
     sheetObj('Additonal Costs',     'Additional Costs',    'Non-base cost line items'),
     sheetObj('Discrepancy Tracker', 'Discrepancy Tracker', 'Flagged mismatches requiring review'),
-    sheetObj('Estimate Variance',   'Estimate Variance',   'Expected estimate vs actual amount alerts')
+    sheetObj('Estimate Variance',   'Estimate Variance',   'Expected estimate vs actual amount alerts'),
+    sheetObj(IMT_REGISTER_SHEET,    'Invoice Register',    'One row per invoice: carrier, RDC, week, status, links'),
+    sheetObj(IMT_AUTOMATION_LOG_SHEET, 'Automation Log',   'What the scheduled automation did and when')
   ];
 
   const configSheets = [
@@ -3974,14 +4349,16 @@ function getDashboardData() {
     sheetObj('Carrier Config', 'Carrier Config', 'Carrier parser mapping and optional invoice pattern'),
     sheetObj('Output Routing', 'Output Routing', 'Route specific data types to different sheets/workbooks'),
     sheetObj('Rule Config',    'Rule Config',    'Toggle business rules and carrier-specific discrepancy checks'),
-    sheetObj('Addl Cost Config', 'Addl Cost Config', 'Map invoice items to haulier Additional Cost sheet columns')
+    sheetObj('Addl Cost Config', 'Addl Cost Config', 'Map invoice items to haulier Additional Cost sheet columns'),
+    sheetObj(IMT_EMAIL_INGEST_SHEET, 'Email Ingest Config', 'Which sender / subject belongs to which carrier')
   ];
 
   const viewerSheets = operationsSheets.filter(s => s.exists);
 
   // --- Console seed ---
   const consoleSeed = [];
-  if (configReadyCount < 8) consoleSeed.push({ message: `${8 - configReadyCount} configuration tab(s) missing — run Initialization.`, type: 'warning' });
+  if (configReadyCount < configTabTotal) consoleSeed.push({ message: `${configTabTotal - configReadyCount} configuration tab(s) missing — run Initialization.`, type: 'warning' });
+  if (automation.lastRunDisplay) consoleSeed.push({ message: `Last automation cycle: ${automation.lastRunDisplay}${automation.lastRun && automation.lastRun.processed !== undefined ? ' (' + automation.lastRun.processed + ' file(s) processed)' : ''}.`, type: 'info' });
   if (masterRows > 0) consoleSeed.push({ message: `Master Input: ${masterRows} rows loaded.`, type: 'info' });
   if (discrepancies > 0) consoleSeed.push({ message: `${discrepancies} discrepanc${discrepancies === 1 ? 'y' : 'ies'} pending resolution.`, type: 'warning' });
   if (consoleSeed.length === 0) consoleSeed.push({ message: 'Dashboard loaded. No issues detected.', type: 'success' });
@@ -3997,12 +4374,15 @@ function getDashboardData() {
       readinessScore: score,
       discrepancyRate: discRate,
       configReadyCount,
+      configTabTotal,
       enabledCarrierCount,
       configuredCarrierCount,
       primaryCarrierCount: primaryRdcs.length,
       linkedHaulierCount
     },
     alerts,
+    automation,
+    register,
     operationsSheets,
     configSheets,
     viewerSheets,
@@ -4027,7 +4407,8 @@ function uploadInvoiceWeb(base64Data, filename, mimeType, carrierKey) {
     const data = splitBase.length > 1 ? splitBase[1] : splitBase[0];
     
     const blob = Utilities.newBlob(Utilities.base64Decode(data), mimeType, filename);
-    folder.createFile(blob);
+    const created = folder.createFile(blob);
+    setFileEmailMeta_(created, { source: 'UPLOAD', carrier: carrierKey, uploadedAt: new Date().toISOString() });
     return { success: true, message: filename + " uploaded successfully to " + carrierKey + " root folder!" };
   } catch (e) {
     return { success: false, message: e.message };
@@ -4147,6 +4528,37 @@ function validateConfiguration_() {
   if (isNaN(retention) || retention < 0) add('warn', 'Archive Retention', 'ARCHIVE_RETENTION_DAYS should be a non-negative integer.');
   else add('ok', 'Archive Retention', `Retention set to ${retention} day(s).`);
 
+  // Automation settings
+  const pollMinutes = parseInt(String(config.AUTO_POLL_MINUTES || '15').trim(), 10);
+  if (isNaN(pollMinutes) || pollMinutes < 1) add('warn', 'Automation Interval', 'AUTO_POLL_MINUTES should be 1, 5, 10, 15, 30 or a multiple of 60.');
+  else add('ok', 'Automation Interval', `AUTO_POLL_MINUTES = ${pollMinutes} (trigger runs every ${normalizePollMinutes_(pollMinutes).hours ? normalizePollMinutes_(pollMinutes).hours * 60 : normalizePollMinutes_(pollMinutes).minutes} min).`);
+  const finalizeMode = String(config.AUTO_FINALIZE_MODE || 'AUTO').trim().toUpperCase();
+  if (finalizeMode === 'AUTO' || finalizeMode === 'REVIEW') add('ok', 'Automation Mode', `AUTO_FINALIZE_MODE = ${finalizeMode}.`);
+  else add('warn', 'Automation Mode', `Unknown AUTO_FINALIZE_MODE '${finalizeMode}'. Use AUTO or REVIEW.`);
+  const weekScheme = String(config.WEEK_NUMBER_SCHEME || 'ISO').trim().toUpperCase();
+  if (['ISO', 'US_SUNDAY', 'US_MONDAY'].indexOf(weekScheme) !== -1) add('ok', 'Week Scheme', `WEEK_NUMBER_SCHEME = ${weekScheme}.`);
+  else add('warn', 'Week Scheme', `Unknown WEEK_NUMBER_SCHEME '${weekScheme}'. Use ISO, US_SUNDAY or US_MONDAY.`);
+  if (String(config.FILENAME_WEEK_FORMAT || '').indexOf('{FILENAME}') === -1) add('warn', 'File Name Format', 'FILENAME_WEEK_FORMAT should contain {FILENAME} so the original name is kept.');
+  else add('ok', 'File Name Format', `FILENAME_WEEK_FORMAT = ${config.FILENAME_WEEK_FORMAT}`);
+  try {
+    const ingestRules = getEmailIngestConfig_();
+    const withSenders = ingestRules.filter(r => r.senders.length).length;
+    if (!ingestRules.length) add('warn', 'Email Ingest Config', 'No carriers configured for email ingestion. Run Initialization and fill in the sender addresses.');
+    else if (!withSenders) add('warn', 'Email Ingest Config', `${ingestRules.length} carrier(s) configured but none has a Sender Match. Emails will only be matched by subject / attachment keywords.`);
+    else add('ok', 'Email Ingest Config', `${withSenders}/${ingestRules.length} carrier(s) have sender matching rules.`);
+  } catch (e) {
+    add('warn', 'Email Ingest Config', e.message);
+  }
+  try {
+    const triggerCount = getAutomationTriggers_().length;
+    if (triggerCount) add('ok', 'Automation Trigger', 'Scheduled trigger is installed.');
+    else add('warn', 'Automation Trigger', 'No scheduled trigger installed. Use the Automation view to install one.');
+  } catch (e) {
+    add('warn', 'Automation Trigger', e.message);
+  }
+  if (ss.getSheetByName(IMT_REGISTER_SHEET)) add('ok', 'Invoice Register', 'Invoice Register sheet is present.');
+  else add('warn', 'Invoice Register', 'Invoice Register sheet missing. Run Initialization.');
+
   Object.keys(config).forEach(key => {
     const val = String(config[key] || '').trim();
     if (!val) return;
@@ -4260,7 +4672,8 @@ function getConfigData() {
     ruleConfig:    readRuleRows(),
     ruleCatalog:   getRuleCatalog_(),
     glCodeTemplates: readRows('GL Code Templates'),
-    addlCostConfig: readRows('Addl Cost Config')
+    addlCostConfig: readRows('Addl Cost Config'),
+    emailIngestConfig: readRows(IMT_EMAIL_INGEST_SHEET)
   };
 }
 
@@ -4277,7 +4690,8 @@ function saveConfigData(sheetName, rows) {
       'Output Routing',
       'Rule Config',
       'GL Code Templates',
-      'Addl Cost Config'
+      'Addl Cost Config',
+      IMT_EMAIL_INGEST_SHEET
     ];
     if (editableSheets.indexOf(sheetName) === -1) {
       return { success: false, message: `Saving to sheet "${sheetName}" is not allowed.` };
@@ -4300,6 +4714,7 @@ function saveConfigData(sheetName, rows) {
       const cols = rows[0].length;
       sheet.getRange(2, 1, rows.length, cols).setValues(rows);
     }
+    invalidateConfigCache_();
     return { success: true, message: `"${sheetName}" saved (${rows ? rows.length : 0} rows).` };
   } catch (e) {
     return { success: false, message: 'Save failed: ' + e.message };
@@ -4312,68 +4727,68 @@ function getInvoiceResults() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const results = [];
 
-  const masterSheet = ss.getSheetByName('Master Input');
   const tmstSheet = ss.getSheetByName('TMST');
   const costsSheet = ss.getSheetByName('Additonal Costs');
   const discSheet = ss.getSheetByName('Discrepancy Tracker');
 
   if (!tmstSheet || tmstSheet.getLastRow() < 2) return results;
 
-  const tmstData = tmstSheet.getRange(2, 1, tmstSheet.getLastRow() - 1, tmstSheet.getLastColumn()).getValues();
-  const masterData = masterSheet && masterSheet.getLastRow() > 1
-    ? masterSheet.getRange(2, 1, masterSheet.getLastRow() - 1, masterSheet.getLastColumn()).getValues()
-    : [];
+  const tmstData = tmstSheet.getRange(2, 1, tmstSheet.getLastRow() - 1, Math.max(16, tmstSheet.getLastColumn())).getValues();
   const costsData = costsSheet && costsSheet.getLastRow() > 1
     ? costsSheet.getRange(2, 1, costsSheet.getLastRow() - 1, costsSheet.getLastColumn()).getValues()
     : [];
   const discData = discSheet && discSheet.getLastRow() > 1
-    ? discSheet.getRange(2, 1, discSheet.getLastRow() - 1, discSheet.getLastColumn()).getValues()
+    ? discSheet.getRange(2, 1, discSheet.getLastRow() - 1, Math.max(8, discSheet.getLastColumn())).getValues()
     : [];
 
-  // Group TMST rows by carrier (col 14) + RDC (col 0) as a proxy for each invoice file
+  // Group TMST rows per invoice: carrier + RDC + invoice number (col 16). Rows written before the
+  // invoice-number column existed fall back to carrier + RDC.
   const invoiceMap = {};
-  tmstData.forEach((row, idx) => {
+  const order = [];
+  const byCarrierRdc = {};
+  tmstData.forEach(row => {
     const rdc = String(row[0] || '').trim();
     const carrier = String(row[14] || '').trim();
-    const key = carrier + '|' + rdc;
+    const invoiceNumber = String(row[15] || '').trim();
+    if (!rdc && !carrier) return;
+    const key = carrier + '|' + rdc + '|' + invoiceNumber;
     if (!invoiceMap[key]) {
-      invoiceMap[key] = { carrier, rdc, tmstRows: [], masterRows: [], costRows: [], discRows: [] };
+      invoiceMap[key] = { carrier, rdc, invoiceNumber, tmstRows: [], costRows: [], discRows: [] };
+      order.push(key);
+      const crKey = carrier + '|' + rdc;
+      if (!byCarrierRdc[crKey]) byCarrierRdc[crKey] = [];
+      byCarrierRdc[crKey].push(key);
     }
     invoiceMap[key].tmstRows.push(row);
   });
 
-  // Attach master rows by RDC
-  masterData.forEach(row => {
-    const rdc = String(row[0] || '').trim();
-    for (let key in invoiceMap) {
-      if (key.endsWith('|' + rdc)) {
-        invoiceMap[key].masterRows.push(row);
-        break;
-      }
-    }
-  });
-
-  // Attach cost rows by RDC + carrier
+  // Additional cost rows carry the source workbook name; attach them to the invoice whose number
+  // appears in that name, otherwise to the first invoice of the same carrier + RDC.
   costsData.forEach(row => {
     const rdc = String(row[0] || '').trim();
     const carrier = String(row[1] || '').trim();
-    const key = carrier + '|' + rdc;
-    if (invoiceMap[key]) invoiceMap[key].costRows.push(row);
+    const source = String(row[4] || '').toUpperCase();
+    const candidates = byCarrierRdc[carrier + '|' + rdc] || [];
+    if (!candidates.length) return;
+    let target = candidates.find(k => invoiceMap[k].invoiceNumber && source.indexOf(invoiceMap[k].invoiceNumber.toUpperCase()) !== -1);
+    if (!target) target = candidates[0];
+    invoiceMap[target].costRows.push(row);
   });
 
-  // Attach discrepancy rows by RDC
+  // Discrepancy rows: exact invoice match when the carrier / invoice columns are present.
   discData.forEach(row => {
     const rdc = String(row[0] || '').trim();
-    for (let key in invoiceMap) {
-      if (key.endsWith('|' + rdc)) {
-        invoiceMap[key].discRows.push(row);
-        break;
-      }
+    const carrier = String(row[6] || '').trim();
+    const invoiceNumber = String(row[7] || '').trim();
+    let target = null;
+    if (carrier || invoiceNumber) target = carrier + '|' + rdc + '|' + invoiceNumber;
+    if (!target || !invoiceMap[target]) {
+      target = order.find(k => invoiceMap[k].rdc === rdc && (!carrier || invoiceMap[k].carrier === carrier)) || null;
     }
+    if (target && invoiceMap[target]) invoiceMap[target].discRows.push(row);
   });
 
-  // Build result summaries
-  for (let key in invoiceMap) {
+  order.forEach(key => {
     const inv = invoiceMap[key];
     const totalTUs = inv.tmstRows.length;
     const matchedTUs = inv.tmstRows.filter(r => String(r[10]) === 'YES').length;
@@ -4393,33 +4808,32 @@ function getInvoiceResults() {
       totalTolls += parseFloat(r[7]) || 0;
     });
 
-    // Delivery type breakdown
     const typeBreakdown = {};
     inv.tmstRows.forEach(r => {
       const t = String(r[9] || 'UNKNOWN').trim().toUpperCase();
       typeBreakdown[t] = (typeBreakdown[t] || 0) + 1;
     });
 
-    // Additional costs summary
     const additionalCosts = inv.costRows.map(r => ({
       description: String(r[2] || ''),
       amount: parseFloat(r[3]) || 0,
       source: String(r[4] || '')
     }));
-    const additionalCostsTotal = additionalCosts.reduce((s, c) => s + c.amount, 0);
+    const additionalCostsTotal = additionalCosts.reduce((sum, c) => sum + c.amount, 0);
 
-    // Discrepancy summary
     const discrepancies = inv.discRows.map(r => ({
-      date: String(r[1] || ''),
+      date: r[1] instanceof Date ? Utilities.formatDate(r[1], Session.getScriptTimeZone(), 'MM/dd/yyyy') : String(r[1] || ''),
       tu: String(r[2] || ''),
       expected: String(r[3] || ''),
       actual: String(r[4] || ''),
       issue: String(r[5] || '')
     }));
 
+    const tz = Session.getScriptTimeZone();
     results.push({
       carrier: inv.carrier,
       rdc: inv.rdc,
+      invoiceNumber: inv.invoiceNumber,
       totalTUs,
       matchedTUs,
       unmatchedTUs,
@@ -4437,7 +4851,7 @@ function getInvoiceResults() {
       discrepancies,
       discrepancyCount: discrepancies.length,
       items: inv.tmstRows.map(r => ({
-        date: String(r[1] || ''),
+        date: r[1] instanceof Date ? Utilities.formatDate(r[1], tz, 'MM/dd/yyyy') : String(r[1] || ''),
         tu: String(r[3] || ''),
         shift: String(r[2] || ''),
         store: String(r[4] || ''),
@@ -4452,7 +4866,7 @@ function getInvoiceResults() {
         tourMatch: String(r[13] || '')
       }))
     });
-  }
+  });
 
   return results;
 }
