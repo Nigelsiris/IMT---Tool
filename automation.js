@@ -111,6 +111,83 @@ function cfgYes_(config, key, defaultYes) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AUTHORIZATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+var IMT_REQUIRED_SCOPES = [
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/drive',
+  'https://mail.google.com/',
+  'https://www.googleapis.com/auth/script.external_request',
+  'https://www.googleapis.com/auth/script.scriptapp'
+];
+
+/**
+ * Reports whether the script owner still has to grant the scopes this build needs (Gmail,
+ * URL fetch for PDF export, triggers). A web app that was authorized before those services were
+ * added keeps running with the old grant, and calls into the new services fail with
+ * "You do not have permission to call ..." instead of prompting.
+ */
+function getAuthorizationStatus_() {
+  const result = { required: false, url: '', detail: '', granted: [] };
+  try {
+    const info = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL);
+    result.required = info.getAuthorizationStatus() === ScriptApp.AuthorizationStatus.REQUIRED;
+    if (result.required) result.url = info.getAuthorizationUrl();
+    try { result.granted = (info.getAuthorizedScopes ? info.getAuthorizedScopes() : []) || []; } catch (e) {}
+  } catch (e) {
+    result.detail = e.message;
+  }
+  return result;
+}
+
+function getAuthorizationStatusWeb() {
+  const status = getAuthorizationStatus_();
+  return {
+    required: status.required,
+    url: status.url,
+    detail: status.detail,
+    requiredScopes: IMT_REQUIRED_SCOPES,
+    grantedScopes: status.granted
+  };
+}
+
+/**
+ * Throws a clear, actionable error when the script has not been granted the scopes it needs.
+ * Called before any file is moved so a half-authorized run cannot leave invoices in
+ * "Unprocessed Temporary".
+ */
+function assertAuthorized_() {
+  const status = getAuthorizationStatus_();
+  if (!status.required) return;
+  throw new Error(
+    'This build needs additional permissions (Gmail, URL fetch for PDF export, triggers). ' +
+    'Open this link as the script owner, approve the access, then run again: ' + status.url +
+    ' — or open the Apps Script editor and run the function authorizeImt().'
+  );
+}
+
+/**
+ * Run this ONCE from the Apps Script editor after updating the code. It touches every service
+ * the tool uses so the consent screen lists all scopes in one go.
+ */
+function authorizeImt() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const lines = [];
+  lines.push('Spreadsheet: ' + ss.getName());
+  lines.push('Drive: ' + DriveApp.getRootFolder().getName());
+  lines.push('Gmail: ' + GmailApp.getInboxUnreadCount() + ' unread');
+  lines.push('Triggers: ' + ScriptApp.getProjectTriggers().length + ' installed');
+  const probe = UrlFetchApp.fetch('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest', { muteHttpExceptions: true });
+  lines.push('UrlFetch: HTTP ' + probe.getResponseCode());
+  lines.push('User: ' + Session.getEffectiveUser().getEmail());
+  const summary = lines.join('\n');
+  Logger.log('[AUTHORIZE]\n' + summary);
+  logAutomation_('Authorization check', summary.replace(/\n/g, ' | '), 'info');
+  return summary;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SHEET SCHEMA
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1165,6 +1242,7 @@ function autoProcessCycle() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let result = '';
   try {
+    assertAuthorized_();
     ensureAutomationSchema_(ss);
     const config = getConfig();
     if (!cfgYes_(config, 'AUTO_PROCESS_ENABLED', true)) {
@@ -1209,6 +1287,7 @@ function ingestEmailsOnlyWeb() {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(10000)) return 'SKIPPED: another run is in progress.';
   try {
+    assertAuthorized_();
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     ensureAutomationSchema_(ss);
     const config = getConfig();
@@ -1245,7 +1324,10 @@ function getAutomationStatus() {
   IMT_AUTOMATION_DEFAULTS.forEach(row => { settings[row[0]] = config[row[0]] !== undefined ? String(config[row[0]]) : row[1]; });
   let gmailOk = true; let gmailDetail = '';
   try { gmailDetail = Session.getEffectiveUser().getEmail(); } catch (e) { gmailOk = false; gmailDetail = e.message; }
+  const auth = getAuthorizationStatus_();
   return {
+    authorizationRequired: auth.required,
+    authorizationUrl: auth.url,
     enabled: cfgYes_(config, 'AUTO_PROCESS_ENABLED', true),
     triggerInstalled: triggers.length > 0,
     triggerMinutes: minutes,

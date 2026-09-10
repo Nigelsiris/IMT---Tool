@@ -821,6 +821,7 @@
             </div>
           </div>
           <div class="section-card-body">
+            <div id="auto-auth-warning" class="alert-strip critical" style="display:none;margin-bottom:12px;"></div>
             <p style="font-size:12px;color:#667085;line-height:1.6;margin-bottom:12px;">
               Every cycle scans Gmail for carrier invoice emails, drops the attachments into the carrier folder, files each invoice under its RDC with the week number in the name,
               reconciles it against the haulier report, codes it (or queues it for review), records it in the <strong>Invoice Register</strong> and replies to the carrier's own email thread when there are discrepancies.
@@ -1119,6 +1120,10 @@ function renderAll(d) {
   seedConsole(d.consoleSeed || []);
   renderAutomationChip(d.automation || {});
   renderRegisterKpis(d.register || {});
+  if (d.authorization && d.authorization.required) {
+    toast('Authorization required: approve the new Gmail / URL fetch / trigger permissions from the dashboard alert before processing.', 'error', 12000);
+    logMsg('Authorization required. Open the "Grant permissions" link on the Dashboard: ' + d.authorization.url, 'error');
+  }
   if (d.workbook && d.workbook.openUrl) {
     document.getElementById('wb-link').href = d.workbook.openUrl;
     document.getElementById('wb-link').textContent = (d.workbook.name || 'Open Workbook') + ' \u2197';
@@ -1142,7 +1147,9 @@ function renderAlerts(alerts) {
     div.className = 'alert-strip ' + a.severity;
     div.innerHTML = '<i class="fa-solid ' + (icons[a.severity] || 'fa-info') + '"></i>'
       + '<div><strong>' + esc(a.title) + '</strong>'
-      + (a.detail ? ' &mdash; ' + esc(a.detail) : '') + '</div>';
+      + (a.detail ? ' &mdash; ' + esc(a.detail) : '')
+      + (a.link ? ' <a href="' + escAttr(a.link) + '" target="_blank" class="btn btn-danger btn-xs" style="margin-left:8px;vertical-align:middle;"><i class="fa-solid fa-key"></i> ' + esc(a.linkLabel || 'Open') + '</a>' : '')
+      + '</div>';
     c.appendChild(div);
   });
 }
@@ -2979,6 +2986,15 @@ function renderAutomation(s) {
   s = s || {};
   var pill = document.getElementById('auto-enabled-pill');
   var on = s.triggerInstalled && s.enabled;
+  var authBox = document.getElementById('auto-auth-warning');
+  if (authBox) {
+    authBox.style.display = s.authorizationRequired ? 'flex' : 'none';
+    if (s.authorizationRequired) {
+      authBox.innerHTML = '<i class="fa-solid fa-circle-xmark"></i><div><strong>Permissions missing.</strong> This build needs Gmail, URL fetch and trigger access that has not been granted yet. '
+        + '<a href="' + escAttr(s.authorizationUrl || '#') + '" target="_blank" class="btn btn-danger btn-xs" style="margin-left:6px;"><i class="fa-solid fa-key"></i> Grant permissions</a>'
+        + ' Then run <code>authorizeImt()</code> from the Apps Script editor if the link does not open a consent screen.</div>';
+    }
+  }
   pill.className = 'pill ' + (on ? 'pill-on' : 'pill-off');
   pill.textContent = on ? 'Running on schedule' : s.triggerInstalled ? 'Paused (AUTO_PROCESS_ENABLED = NO)' : 'Not scheduled';
 

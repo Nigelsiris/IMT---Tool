@@ -26,6 +26,8 @@ function onOpen() {
     .addItem('4. Run Automation Cycle Now', 'autoProcessCycle')
     .addItem('5. Install Automation Trigger', 'installAutomationTriggers')
     .addItem('6. Remove Automation Trigger', 'removeAutomationTriggers')
+    .addSeparator()
+    .addItem('7. Authorize Permissions (run once after updates)', 'authorizeImt')
     .addToUi();
 }
 
@@ -904,6 +906,7 @@ function runMainProcess(isWebApp = false, options) {
     Logger.log(_extractOnlyMode ? '--- STARTING INVOICE EXTRACTION ---' : '--- STARTING INVOICE PROCESSING ---');
 
     invalidateConfigCache_();
+    assertAuthorized_();
     const config = getConfig();
     if (!_runCtx || !options.keepContext) {
       beginRunContext_({ mode: isAutoRun ? 'auto' : 'manual', config: config });
@@ -4285,6 +4288,19 @@ function getDashboardData() {
     alerts.push({ severity: 'warning', title: 'Estimate Variance Alerts', detail: `${estimateVarianceRows} TU row(s) exceed estimate-vs-actual threshold.` });
   }
 
+  // --- Authorization (new scopes need a one-time consent from the script owner) ---
+  let authorization = { required: false, url: '' };
+  try { authorization = getAuthorizationStatus_(); } catch (e) {}
+  if (authorization.required) {
+    alerts.unshift({
+      severity: 'critical',
+      title: 'Authorization Required',
+      detail: 'This build needs Gmail, URL fetch (PDF export) and trigger permissions that have not been granted yet. Processing will fail until the script owner approves them.',
+      link: authorization.url,
+      linkLabel: 'Grant permissions'
+    });
+  }
+
   // --- Automation + Invoice Register summary (single round-trip for the UI) ---
   let automation = { triggerInstalled: false, enabled: true, mode: 'AUTO', autoSend: true, lastRunDisplay: '', lastRun: null, triggerMinutes: 0 };
   try {
@@ -4381,6 +4397,7 @@ function getDashboardData() {
       linkedHaulierCount
     },
     alerts,
+    authorization: { required: authorization.required, url: authorization.url },
     automation,
     register,
     operationsSheets,

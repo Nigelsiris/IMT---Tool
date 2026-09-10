@@ -47,19 +47,30 @@ clear them first (controlled by `AUTO_ARCHIVE_ON_MANUAL_RUN`).
 ## One-time setup
 
 1. Add `automation.js` to the Apps Script project next to `code.js` and `Index.html`
-   (or push with `clasp`). Redeploy the web app.
-2. Open the web app and click **Initialize Config**. This adds the automation settings to
+   (or push with `clasp`). Replace the project manifest with `appsscript.json` from this repo
+   (Apps Script editor → Project Settings → *Show "appsscript.json" manifest file in editor*).
+2. **Grant the new permissions.** This build uses Gmail, URL fetch (PDF export) and triggers,
+   which your earlier authorization did not cover. A web app that is missing scopes does not
+   prompt; it fails with `You do not have permission to call UrlFetchApp.fetch` (or
+   `GmailApp...`). Either
+   - open the Apps Script editor, select the function `authorizeImt` and click **Run**, then
+     approve the consent screen, or
+   - open the web app: the dashboard shows an **Authorization Required** alert with a
+     **Grant permissions** link that opens the same consent screen.
+   Then create a new deployment version (Deploy → Manage deployments → Edit → Version: New).
+   Any invoice that failed before the grant is in the carrier's `Unprocessed Temporary`
+   folder; move it back to the carrier root folder and it will be processed on the next run.
+3. Open the web app and click **Initialize Config**. This adds the automation settings to
    *System Config* and creates the `Invoice Register`, `Automation Log` and
    `Email Ingest Config` tabs.
-3. Go to **Automation** and fill in the **Email Ingest Rules**: one row per carrier with the
+4. Go to **Automation** and fill in the **Email Ingest Rules**: one row per carrier with the
    sender addresses or domains the invoices come from (for example
    `ap@hbtrucking.com, hbtrucking.com`). Save.
-4. Review the **Automation Settings** (interval, AUTO vs REVIEW mode, auto-send, CC list,
+5. Review the **Automation Settings** (interval, AUTO vs REVIEW mode, auto-send, CC list,
    week numbering scheme, file name format) and save.
-5. Click **Install / Update Schedule**. The first click asks for Gmail permission because the
-   script now reads your inbox and sends replies on your behalf. Triggers run as the account
-   that installs them, so install from the account whose inbox receives the invoices.
-6. Click **Run Cycle Now** once and watch the Activity Log and the Invoice Register.
+6. Click **Install / Update Schedule**. Triggers run as the account that installs them, so
+   install from the account whose inbox receives the invoices.
+7. Click **Run Cycle Now** once and watch the Activity Log and the Invoice Register.
 
 Use **Scan Inbox Only** to fetch attachments without processing, and the Sheets menu
 `🚀 Invoice Automation → Run Automation Cycle Now` when the web app is not open.
@@ -114,6 +125,11 @@ The Email Template tab now supports `{InvoiceNumber}`, `{Week}` and `{RDC}` in a
   with no new files returns without opening them at all.
 
 ## Troubleshooting
+
+- **`You do not have permission to call UrlFetchApp.fetch` / `GmailApp`**: the script owner
+  has not approved the new scopes. Run `authorizeImt` from the editor or use the
+  **Grant permissions** link on the dashboard, then redeploy a new version (see setup step 2).
+  Every run now checks this up front and stops before touching any file.
 
 - **Nothing is ingested**: run **Scan Inbox Only** and read the Activity Log. "Email not
   matched to a carrier" means the sender is not in the Email Ingest Config; the thread is
